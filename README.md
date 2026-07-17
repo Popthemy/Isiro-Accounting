@@ -1,3 +1,6 @@
+Here is a polished `README.md` suitable for a final-year project repository. It presents Isiro as a complete financial management system while keeping the technical details clear for reviewers.
+
+```markdown
 # Isiro — Personal Finance Management & Statement Intelligence Platform
 
 ![Isiro Logo](#)
@@ -196,3 +199,215 @@ The system generates:
 ---
 
 # Project Architecture
+
+```
+
+Isiro
+│
+├── Authentication
+│   ├── User registration
+│   ├── Login
+│   └── Profile management
+│
+├── Transactions
+│   ├── Income tracking
+│   ├── Expense tracking
+│   └── Categories
+│
+├── Imports
+│   ├── PDF parser
+│   ├── CSV parser
+│   └── OCR extraction
+│
+├── Analytics
+│   ├── Dashboard
+│   ├── Reports
+│   └── Spending insights
+│
+└── Budget Management
+└── Category budgets
+
+````
+
+---
+
+# Installation
+
+## Clone Repository
+
+```bash
+git clone https://github.com/yourusername/isiro.git
+
+cd isiro
+````
+
+---
+
+## Create Virtual Environment
+
+```bash
+python -m venv venv
+```
+
+Activate:
+
+### Windows
+
+```bash
+venv\Scripts\activate
+```
+
+### Linux/Mac
+
+```bash
+source venv/bin/activate
+```
+
+---
+
+## Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+## Configure Database
+
+Run migrations:
+
+```bash
+python manage.py migrate
+```
+
+---
+
+## Create Admin Account
+
+```bash
+python manage.py createsuperuser
+```
+
+---
+
+## Run Development Server
+
+```bash
+python manage.py runserver
+```
+
+Open:
+
+```
+http://127.0.0.1:8000/
+```
+
+---
+
+# Usage
+
+### Add Transactions
+
+Users can manually create:
+
+* Expenses
+* Income records
+
+---
+
+### Import Bank Statement
+
+1. Navigate to **Import Statement**
+2. Upload PDF or CSV file
+3. Allow Isiro to process transactions
+4. Review extracted records
+5. Save transactions
+
+---
+
+### View Insights
+
+Dashboard provides:
+
+* Current balance
+* Total income
+* Total expenses
+* Spending categories
+* Monthly trends
+
+---
+
+# Future Improvements
+
+Potential enhancements:
+
+* Mobile application
+* AI-powered spending recommendations
+* Automatic bank API integration
+* Multi-currency exchange rates
+* Recurring transaction detection
+* Advanced financial forecasting
+* Machine learning transaction categorisation
+
+---
+
+# Pricing Concept
+
+## Free
+
+$0/month
+
+Includes:
+
+* Manual tracking
+* Basic charts
+* Limited monthly transactions
+
+---
+
+## Pro
+
+$9/month
+
+Includes:
+
+* Unlimited transactions
+* PDF/CSV imports
+* OCR extraction
+* Advanced reports
+
+---
+
+## Business
+
+$29/month
+
+Includes:
+
+* Multi-user accounts
+* Team budgets
+* Priority support
+* API access
+
+---
+
+# Project Information
+
+**Project Name:** Isiro
+**Type:** Final Year Software Engineering Project
+**Category:** Financial Technology (FinTech)
+**Purpose:** Personal finance management and intelligent statement processing
+
+---
+
+# License
+
+This project was developed for academic purposes.
+
+© 2026 Isiro. All rights reserved.
+
+Built to simplify financial tracking and help users make smarter money decisions.
+
+```
+
