@@ -1,0 +1,59 @@
+<!-- Notification dropdown partial — can be included in any page or fetched via AJAX -->
+<div class="notification-dropdown" id="notificationDropdown" style="display:none; position:absolute; right:0; top:50px; width:360px; background:var(--surface); border:1px solid var(--border); border-radius:var(--r-lg); box-shadow:var(--shadow-lg); z-index:200; max-height:400px; overflow-y:auto;">
+    <div style="padding:16px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+        <strong>Notifications</strong>
+        <a href="{% url 'notifications:list' %}" style="font-size:0.85rem;">View All</a>
+    </div>
+    <div id="dropdownNotifications">
+        <div style="padding:40px; text-align:center; color:var(--gray-400);">
+            <div class="spinner-lg" style="width:24px; height:24px;"></div>
+            <p style="margin-top:12px; font-size:0.85rem;">Loading...</p>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const bell = document.querySelector(".notification-bell");
+    const dropdown = document.getElementById("notificationDropdown");
+    if (!bell || !dropdown) return;
+
+    bell.addEventListener("click", function(e) {
+        e.preventDefault();
+        dropdown.style.display = dropdown.style.display === "none" ? "block" : "none";
+        if (dropdown.style.display === "block") {
+            fetch("{% url 'notifications:dropdown' %}")
+                .then(r => r.json())
+                .then(data => {
+                    const container = document.getElementById("dropdownNotifications");
+                    if (data.notifications.length === 0) {
+                        container.innerHTML = '<div style="padding:32px; text-align:center; color:var(--gray-400);"><i class="fas fa-bell-slash" style="font-size:2rem; margin-bottom:8px;"></i><p>No notifications</p></div>';
+                        return;
+                    }
+                    container.innerHTML = data.notifications.map(n => `
+                        <div class="notification-item ${!n.is_read ? 'unread' : ''}">
+                            <div class="notification-icon ${n.type}">
+                                <i class="fas fa-circle-info"></i>
+                            </div>
+                            <div class="notification-content">
+                                <div class="title">${n.title}</div>
+                                <div class="message">${n.message}</div>
+                                <div class="time">${n.created_at}</div>
+                            </div>
+                        </div>
+                    `).join("");
+                })
+                .catch(() => {
+                    document.getElementById("dropdownNotifications").innerHTML =
+                        '<div style="padding:24px; text-align:center; color:var(--gray-400);">Failed to load notifications.</div>';
+                });
+        }
+    });
+
+    document.addEventListener("click", function(e) {
+        if (!bell.contains(e.target) && !dropdown.contains(e.target)) {
+            dropdown.style.display = "none";
+        }
+    });
+});
+</script>

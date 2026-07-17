@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Delete Transaction — Isiro{% endblock %}
+
+{% block body_class %}app-page{% endblock %}
+
+{% block content %}
+<div class="app-layout">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <a href="{% url 'landing' %}" class="logo"><i class="fas fa-wallet"></i> Isiro</a>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="{% url 'dashboard' %}" class="nav-item"><i class="fas fa-gauge-high"></i> Dashboard</a>
+            <a href="{% url 'expenses:list' %}" class="nav-item active"><i class="fas fa-receipt"></i> Expenses</a>
+            <a href="{% url 'imports:upload' %}" class="nav-item"><i class="fas fa-file-import"></i> Import Statement</a>
+            <a href="{% url 'expenses:categories' %}" class="nav-item"><i class="fas fa-tags"></i> Categories</a>
+            <a href="{% url 'expenses:reports' %}" class="nav-item"><i class="fas fa-chart-line"></i> Reports</a>
+            <a href="{% url 'users:profile' %}" class="nav-item"><i class="fas fa-user"></i> Profile</a>
+        </nav>
+        <div class="sidebar-footer">
+            <form method="post" action="{% url 'users:logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="nav-item" style="width:100%; border:none; background:none; text-align:left;">
+                    <i class="fas fa-right-from-bracket"></i> Logout
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div class="topbar">
+            <div style="display:flex; align-items:center; gap:16px;">
+                <button class="menu-toggle"><i class="fas fa-bars"></i></button>
+                <h1>Delete Transaction</h1>
+            </div>
+        </div>
+
+        <div class="card" style="max-width:500px; border-color: var(--danger-100);">
+            <div style="text-align:center; padding:20px;">
+                <i class="fas fa-triangle-exclamation" style="font-size:3rem; color:var(--danger-500); margin-bottom:16px;"></i>
+                <h3>Are you sure?</h3>
+                <p style="color:var(--gray-500); margin:12px 0 24px;">
+                    This will permanently delete the transaction:
+                    <br><strong>{{ object.description|default:"Untitled" }}</strong>
+                    — {{ object.amount|floatformat:2 }}
+                </p>
+                <form method="post">
+                    {% csrf_token %}
+                    <div style="display:flex; gap:12px; justify-content:center;">
+                        <button type="submit" class="btn btn-danger">
+                            <span class="spinner"></span><span class="btn-text">Yes, Delete</span>
+                        </button>
+                        <a href="{% url 'expenses:list' %}" class="btn btn-ghost"><span class="btn-text">Cancel</span></a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

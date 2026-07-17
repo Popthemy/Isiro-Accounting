@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Categories — Isiro{% endblock %}
+
+{% block body_class %}app-page{% endblock %}
+
+{% block content %}
+<div class="app-layout">
+    {% include "partials/sidebar.html" with active="categories" %}
+
+    <main class="main-content">
+        <div class="topbar">
+            <div style="display:flex; align-items:center; gap:16px;">
+                <button class="menu-toggle"><i class="fas fa-bars"></i></button>
+                <h1>Categories</h1>
+            </div>
+            <div class="topbar-actions">
+                <a href="{% url 'expenses:category_add' %}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus"></i> Add Category
+                </a>
+            </div>
+        </div>
+
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }}">
+            <i class="fas fa-{% if message.tags == 'success' %}circle-check{% elif message.tags == 'error' %}circle-xmark{% else %}circle-info{% endif %}"></i>
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        <div class="txn-section">
+            {% if cat_stats %}
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Icon</th>
+                            <th>Name</th>
+                            <th>Monthly Spending</th>
+                            <!-- <th>Share</th> -->
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in cat_stats %}
+                        <tr>
+                            <td>
+                                <div style="width:36px; height:36px; border-radius:8px; background:{{ item.category.color }}20; color:{{ item.category.color }}; display:flex; align-items:center; justify-content:center;">
+                                    <i class="fas {{ item.category.icon }}"></i>
+                                </div>
+                            </td>
+                            <td><strong>{{ item.category.name }}</strong>{% if item.category.is_default %} <span class="badge badge-source">Default</span>{% endif %}</td>
+                            <td class="amount-expense">{{ item.spent|floatformat:2 }} {{ currency }}</td>
+                            <td>
+                                {% with total_spent=stats.month_expenses %}
+                                {% if total_spent > 0 %}
+                                {{ item.spent|floatformat:0 }}%
+                                {% else %}—{% endif %}
+                                {% endwith %}
+                            </td>
+                            <td>
+                                <a href="{% url 'expenses:category_edit' item.category.id %}" class="btn btn-ghost btn-sm"><i class="fas fa-pen"></i></a>
+                                <a href="{% url 'expenses:category_delete' item.category.id %}" class="btn btn-ghost btn-sm" style="color:var(--danger-500);"><i class="fas fa-trash"></i></a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-tags"></i>
+                <h3>No categories yet</h3>
+                <p>Create your first category to organise your transactions.</p>
+                <a href="{% url 'expenses:category_add' %}" class="btn btn-primary" style="margin-top:16px;">
+                    <span class="btn-text">Add Category</span>
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </main>
+</div>
+
+{% include "partials/bottom_nav.html" with active="categories" %}
+{% endblock %}

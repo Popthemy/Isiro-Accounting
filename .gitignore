@@ -1,0 +1,6 @@
+
+# Environment variables
+.env*.local
+
+# Common ignores
+venv

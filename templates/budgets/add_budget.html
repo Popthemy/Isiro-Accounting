@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Create Budget — Isiro{% endblock %}
+
+{% block body_class %}app-page{% endblock %}
+
+{% block content %}
+<div class="app-layout">
+    {% include "partials/sidebar.html" with active="budgets" %}
+
+    <main class="main-content">
+        <div class="topbar">
+            <div style="display:flex; align-items:center; gap:16px;">
+                <button class="menu-toggle"><i class="fas fa-bars"></i></button>
+                <h1>Create Budget</h1>
+            </div>
+        </div>
+
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }}"><i class="fas fa-circle-info"></i> {{ message }}</div>
+        {% endfor %}
+        {% endif %}
+
+        <div class="card" style="max-width:600px;">
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label class="form-label">Budget Name</label>
+                    {{ form.name }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Category</label>
+                    {{ form.category }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Amount Limit</label>
+                    {{ form.amount_limit }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Period</label>
+                    {{ form.period_type }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Start Date</label>
+                    {{ form.start_date }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">End Date</label>
+                    {{ form.end_date }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Alert Percentage (%)</label>
+                    {{ form.alert_percentage }}
+                    <div class="form-help">Get notified when spending reaches this percentage of the limit.</div>
+                </div>
+                <div class="form-group">
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        {{ form.is_active }}
+                        <label>Active</label>
+                    </div>
+                </div>
+                <div style="display:flex; gap:12px;">
+                    <button type="submit" class="btn btn-primary">
+                        <span class="spinner"></span><span class="btn-text">Create Budget</span>
+                    </button>
+                    <a href="{% url 'budgets:list' %}" class="btn btn-ghost"><span class="btn-text">Cancel</span></a>
+                </div>
+            </form>
+        </div>
+    </main>
+</div>
+
+{% include "partials/bottom_nav.html" with active="budgets" %}
+{% endblock %}

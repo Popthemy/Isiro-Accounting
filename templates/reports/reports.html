@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Reports — Isiro{% endblock %}
+
+{% block body_class %}app-page{% endblock %}
+
+{% block content %}
+<div class="app-layout">
+    {% include "partials/sidebar.html" with active="reports" %}
+
+    <main class="main-content">
+        <div class="topbar">
+            <div style="display:flex; align-items:center; gap:16px;">
+                <button class="menu-toggle"><i class="fas fa-bars"></i></button>
+                <h1>Reports & Analytics</h1>
+            </div>
+            <div class="topbar-actions">
+                <form method="post" style="display:inline;">
+                    {% csrf_token %}
+                    <input type="hidden" name="period" value="{{ period }}">
+                    <input type="hidden" name="start" value="{{ start|date:'Y-m-d' }}">
+                    <input type="hidden" name="end" value="{{ end|date:'Y-m-d' }}">
+                    <input type="hidden" name="export_type" value="csv">
+                    <button type="submit" class="btn btn-secondary btn-sm"><i class="fas fa-file-csv"></i> Export CSV</button>
+                </form>
+                <form method="post" style="display:inline;">
+                    {% csrf_token %}
+                    <input type="hidden" name="period" value="{{ period }}">
+                    <input type="hidden" name="start" value="{{ start|date:'Y-m-d' }}">
+                    <input type="hidden" name="end" value="{{ end|date:'Y-m-d' }}">
+                    <input type="hidden" name="export_type" value="pdf">
+                    <button type="submit" class="btn btn-secondary btn-sm"><i class="fas fa-file-pdf"></i> Export PDF</button>
+                </form>
+            </div>
+        </div>
+
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }}"><i class="fas fa-circle-info"></i> {{ message }}</div>
+        {% endfor %}
+        {% endif %}
+
+        <!-- Date filters -->
+        <form method="get" class="filters filter-group">
+            <button type="submit" name="period" value="week" class="filter-btn {% if period == 'week' %}active{% endif %}">This Week</button>
+            <button type="submit" name="period" value="month" class="filter-btn {% if period == 'month' %}active{% endif %}">This Month</button>
+            <button type="submit" name="period" value="30" class="filter-btn {% if period == '30' %}active{% endif %}">Last 30 Days</button>
+            <button type="submit" name="period" value="custom" class="filter-btn {% if period == 'custom' %}active{% endif %}">Custom Range</button>
+            {% if period == 'custom' %}
+                <input type="date" name="start" class="form-input" value="{{ start|date:'Y-m-d' }}">
+                <input type="date" name="end" class="form-input" value="{{ end|date:'Y-m-d' }}">
+                <button type="submit" class="btn btn-primary btn-sm">Apply</button>
+            {% endif %}
+        </form>
+
+        <p style="color:var(--gray-500); margin-bottom:24px;">
+            <i class="fas fa-calendar"></i> Period: {{ start|date:"d M Y" }} — {{ end|date:"d M Y" }}
+        </p>
+
+        <!-- Analytics cards -->
+        <div class="stat-grid">
+            <div class="stat-card">
+                <div class="stat-icon expense"><i class="fas fa-arrow-down"></i></div>
+                <div class="stat-label">Total Spending</div>
+                <div class="stat-value">{{ total_expenses|floatformat:2 }}</div>
+                <div class="stat-sub">{{ currency }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon balance"><i class="fas fa-calculator"></i></div>
+                <div class="stat-label">Average Daily Spending</div>
+                <div class="stat-value">{{ avg_daily|floatformat:2 }}</div>
+                <div class="stat-sub">{{ currency }}/day</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon income"><i class="fas fa-trophy"></i></div>
+                <div class="stat-label">Highest Category</div>
+                <div class="stat-value" style="font-size:1.3rem;">
+                    {% if highest_cat %}{{ highest_cat.category__name|default:"Uncategorised" }}{% else %}—{% endif %}
+                </div>
+                <div class="stat-sub">{% if highest_cat %}{{ highest_cat.total|floatformat:2 }} {{ currency }}{% endif %}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon savings"><i class="fas fa-arrow-up-right-dots"></i></div>
+                <div class="stat-label">Highest Transaction</div>
+                <div class="stat-value" style="font-size:1.3rem;">
+                    {% if highest_txn %}{{ highest_txn.amount|floatformat:2 }}{% else %}—{% endif %}
+                </div>
+                <div class="stat-sub">{% if highest_txn %}{{ highest_txn.description|default:""|truncatechars:30 }}{% endif %}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon income"><i class="fas fa-arrow-up"></i></div>
+                <div class="stat-label">Total Income</div>
+                <div class="stat-value">{{ total_income|floatformat:2 }}</div>
+                <div class="stat-sub">{{ currency }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon balance"><i class="fas fa-wallet"></i></div>
+                <div class="stat-label">Net Balance</div>
+                <div class="stat-value">{{ net|floatformat:2 }}</div>
+                <div class="stat-sub">{{ currency }}</div>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="chart-grid">
+            <div class="chart-card">
+                <h3>Category Breakdown</h3>
+                <div class="chart-container">
+                    <canvas id="reportPieChart"
+                        data-chart='{"labels": [{% for d in category_data %}"{{ d.category__name|default:"Uncategorised" }}"{% if not forloop.last %},{% endif %}{% endfor %}],
+                                    "values": [{% for d in category_data %}{{ d.total|default:0 }}{% if not forloop.last %},{% endif %}{% endfor %}],
+                                    "colors": [{% for d in category_data %}"{{ d.category__color|default:"#6B7280" }}"{% if not forloop.last %},{% endif %}{% endfor %}]}'></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <h3>Monthly Trend</h3>
+                <div class="chart-container">
+                    <canvas id="reportLineChart"
+                        data-chart='{"labels": [{% for label, val in trend.items %}"{{ label }}"{% if not forloop.last %},{% endif %}{% endfor %}],
+                                    "values": [{% for label, val in trend.items %}{{ val }}{% if not forloop.last %},{% endif %}{% endfor %}]}'></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="chart-grid" style="grid-template-columns:1fr;">
+            <div class="chart-card">
+                <h3>Income vs Expenses</h3>
+                <div class="chart-container" style="height:200px;">
+                    <canvas id="reportBarChart"
+                        data-chart='{"values": [{{ total_income|floatformat:2 }}, {{ total_expenses|floatformat:2 }}]}'></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transaction list -->
+        <div class="txn-section">
+            <h3 style="margin-bottom:20px;">Transactions ({{ transactions|length }})</h3>
+            {% if transactions %}
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead>
+                        <tr><th>Date</th><th>Category</th><th>Description</th><th>Amount</th><th>Type</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for t in transactions %}
+                        <tr>
+                            <td>{{ t.date|date:"d M Y" }}</td>
+                            <td>{% if t.category %}<span class="cat-dot" style="background:{{ t.category.color }};"></span>{{ t.category.name }}{% else %}—{% endif %}</td>
+                            <td>{{ t.description|default:"—" }}</td>
+                            <td class="{% if t.transaction_type == 'expense' %}amount-expense{% else %}amount-income{% endif %}">{% if t.transaction_type == 'expense' %}-{% endif %}{{ t.amount|floatformat:2 }}</td>
+                            <td><span class="badge badge-{{ t.transaction_type }}">{{ t.transaction_type|title }}</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state"><i class="fas fa-folder-open"></i><h3>No transactions in this period</h3></div>
+            {% endif %}
+        </div>
+    </main>
+</div>
+
+{% include "partials/bottom_nav.html" with active="reports" %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+// Render report line chart in addition to pie and bar
+document.addEventListener("DOMContentLoaded", function() {
+    if (typeof Chart === "undefined") return;
+    const lineEl = document.getElementById("reportLineChart");
+    if (lineEl) {
+        const data = JSON.parse(lineEl.dataset.chart || "{}");
+        new Chart(lineEl, {
+            type: "line",
+            data: {
+                labels: data.labels || [],
+                datasets: [{
+                    label: "Monthly Spending",
+                    data: data.values || [],
+                    borderColor: "#4F46E5",
+                    backgroundColor: "rgba(79,70,229,0.1)",
+                    fill: true, tension: 0.4,
+                    pointBackgroundColor: "#4F46E5",
+                    pointRadius: 5, pointHoverRadius: 7, borderWidth: 3,
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                scales: { y: { beginAtZero: true, grid: { color: "#F3F4F6" } }, x: { grid: { display: false } } },
+                plugins: { legend: { position: "bottom" } }
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

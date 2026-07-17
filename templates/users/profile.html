@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Profile — Isiro{% endblock %}
+
+{% block body_class %}app-page{% endblock %}
+
+{% block content %}
+<div class="app-layout">
+    {% include "partials/sidebar.html" with active="profile" %}
+
+    <main class="main-content">
+        <div class="topbar">
+            <div style="display:flex; align-items:center; gap:16px;">
+                <button class="menu-toggle"><i class="fas fa-bars"></i></button>
+                <h1>Profile Settings</h1>
+            </div>
+            <div class="topbar-actions">
+                <div class="user-avatar">{{ user.initials }}</div>
+            </div>
+        </div>
+
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }}">
+            <i class="fas fa-{% if message.tags == 'success' %}circle-check{% elif message.tags == 'error' %}circle-xmark{% else %}circle-info{% endif %}"></i>
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+
+      
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; max-width:900px;">
+            <!-- Profile info -->
+            <div class="card">
+                <h3 style="margin-bottom:24px;"><i class="fas fa-user-circle" style="color:var(--primary-600);"></i> User Information</h3>
+                
+                
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input type="hidden" name="update_profile" value="1">
+                    <div class="form-group">
+                        <label class="form-label">Full Name</label>
+                        {{ profile_form.full_name }}
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        {{ profile_form.email }}
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Profile Image</label>
+                        {{ profile_form.profile_image }}
+                        {% if user.profile_image %}
+                        <img src="{{ user.profile_image.url }}" alt="Profile" style="width:64px; height:64px; border-radius:50%; margin-top:12px; object-fit:cover;">
+                        {% endif %}
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <span class="spinner"></span><span class="btn-text">Save Changes</span>
+                    </button>
+                </form>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:24px;">
+                <!-- Preferences -->
+                <div class="card">
+                    <h3 style="margin-bottom:20px;"><i class="fas fa-sliders" style="color:var(--primary-600);"></i> Preferences</h3>
+                      <!-- error -->
+                    <div>
+                    {% if profile_form.errors %}
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle"></i> {{ form.errors|join:", " }}
+                        </div>
+                    {% endif %}
+                    </div>
+                    <form method="post" >
+                        
+                        {% csrf_token %}
+                        <input type="hidden" name="update_preferences" value="1">
+                        <div class="form-group">
+                            <label class="form-label">Currency</label>
+                            {{ preference_form.currency }}
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Monthly Budget Preference</label>
+                            {{ preference_form.monthly_budget_preference }}
+                            <div class="form-help">Set your target monthly spending limit.</div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Theme Preference</label>
+                            {{ preference_form.theme_preference }}
+                        </div>
+                        <button type="submit" class="btn btn-secondary btn-sm">
+                            <span class="btn-text">Update Preferences</span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Notifications -->
+                <div class="card">
+                    <h3 style="margin-bottom:20px;"><i class="fas fa-bell" style="color:var(--primary-600);"></i> Notification Settings</h3>
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="update_notifications" value="1">
+                        <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+                            {{ notification_form.notify_expenses }}
+                            <label>Expense alerts</label>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+                            {{ notification_form.notify_budgets }}
+                            <label>Budget warnings</label>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:12px; margin-bottom:20px;">
+                            {{ notification_form.notify_imports }}
+                            <label>Import completion</label>
+                        </div>
+                        <button type="submit" class="btn btn-secondary btn-sm">
+                            <span class="btn-text">Update Notifications</span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Password -->
+                <div class="card">
+                    <h3 style="margin-bottom:20px;"><i class="fas fa-lock" style="color:var(--primary-600);"></i> Change Password</h3>
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="change_password" value="1">
+                        <div class="form-group">
+                            <label class="form-label">Current Password</label>
+                            {{ password_form.old_password }}
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">New Password</label>
+                            {{ password_form.new_password1 }}
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Confirm New Password</label>
+                            {{ password_form.new_password2 }}
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <span class="spinner"></span><span class="btn-text">Change Password</span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Danger zone -->
+                <div class="card" style="border-color: var(--danger-100);">
+                    <h3 style="margin-bottom:16px; color: var(--danger-600);"><i class="fas fa-triangle-exclamation"></i> Danger Zone</h3>
+                    <p style="color:var(--gray-500); font-size:0.9rem; margin-bottom:16px;">Deleting your account permanently removes all your data.</p>
+                    <div style="display:flex; gap:12px;">
+                        <form method="post" action="{% url 'users:logout' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-ghost btn-sm"><span class="btn-text">Logout</span></button>
+                        </form>
+                        <form method="post" action="{% url 'users:delete_account' %}" onsubmit="return confirm('Are you sure? This cannot be undone.');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger btn-sm"><span class="btn-text">Delete Account</span></button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+{% include "partials/bottom_nav.html" with active="profile" %}
+{% endblock %}

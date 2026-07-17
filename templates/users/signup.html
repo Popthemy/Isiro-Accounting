@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Sign Up — Isiro{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+    <div class="auth-card">
+        <div class="auth-logo">
+            <a href="{% url 'landing' %}" class="logo">
+                <i class="fas fa-wallet"></i> Isiro
+            </a>
+        </div>
+        <h2>Create Your Account</h2>
+        <p class="auth-subtitle">Start tracking your finances today</p>
+
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }}">
+            <i class="fas fa-circle-info"></i> {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label class="form-label">Full Name</label>
+                {{ form.full_name }}
+                {% if form.full_name.errors %}<div class="form-error">{{ form.full_name.errors }}</div>{% endif %}
+            </div>
+            <div class="form-group">
+                <label class="form-label">Email</label>
+                {{ form.email }}
+                {% if form.email.errors %}<div class="form-error">{{ form.email.errors }}</div>{% endif %}
+            </div>
+            <div class="form-group">
+                <label class="form-label">Password</label>
+                {{ form.password1 }}
+                <div class="form-help">At least 8 characters.</div>
+                {% if form.password1.errors %}<div class="form-error">{{ form.password1.errors }}</div>{% endif %}
+            </div>
+            <div class="form-group">
+                <label class="form-label">Confirm Password</label>
+                {{ form.password2 }}
+                {% if form.password2.errors %}<div class="form-error">{{ form.password2.errors }}</div>{% endif %}
+            </div>
+            <button type="submit" class="btn btn-primary btn-block btn-lg">
+                <span class="spinner"></span>
+                <span class="btn-text">Create Account</span>
+            </button>
+        </form>
+
+        <div class="auth-footer">
+            Already have an account? <a href="{% url 'users:login' %}">Sign in</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

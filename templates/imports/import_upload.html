@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Import Statement — Isiro{% endblock %}
+
+{% block body_class %}app-page{% endblock %}
+
+{% block content %}
+<div class="app-layout">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <a href="{% url 'landing' %}" class="logo"><i class="fas fa-wallet"></i> Isiro</a>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="{% url 'dashboard' %}" class="nav-item"><i class="fas fa-gauge-high"></i> Dashboard</a>
+            <a href="{% url 'expenses:list' %}" class="nav-item"><i class="fas fa-receipt"></i> Expenses</a>
+            <a href="{% url 'imports:upload' %}" class="nav-item active"><i class="fas fa-file-import"></i> Import Statement</a>
+            <a href="{% url 'expenses:categories' %}" class="nav-item"><i class="fas fa-tags"></i> Categories</a>
+            <a href="{% url 'expenses:reports' %}" class="nav-item"><i class="fas fa-chart-line"></i> Reports</a>
+            <a href="{% url 'users:profile' %}" class="nav-item"><i class="fas fa-user"></i> Profile</a>
+        </nav>
+        <div class="sidebar-footer">
+            <form method="post" action="{% url 'users:logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="nav-item" style="width:100%; border:none; background:none; text-align:left;">
+                    <i class="fas fa-right-from-bracket"></i> Logout
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div class="topbar">
+            <div style="display:flex; align-items:center; gap:16px;">
+                <button class="menu-toggle"><i class="fas fa-bars"></i></button>
+                <h1>Import Bank Statement</h1>
+            </div>
+        </div>
+
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }}">
+            <i class="fas fa-{% if message.tags == 'success' %}circle-check{% elif message.tags == 'error' %}circle-xmark{% elif message.tags == 'warning' %}triangle-exclamation{% else %}circle-info{% endif %}"></i>
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        <div class="card" style="max-width:700px;">
+            <h3 style="margin-bottom:8px;"><i class="fas fa-cloud-arrow-up" style="color:var(--primary-600);"></i> Upload Your Statement</h3>
+            <p style="color:var(--gray-500); margin-bottom:24px; font-size:0.9rem;">
+                Upload a PDF or CSV bank statement. Isiro will automatically detect columns and extract transactions.
+            </p>
+
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label class="form-label">Statement File (PDF or CSV)</label>
+                    <div class="upload-area" style="border:2px dashed var(--border); border-radius:16px; padding:48px; text-align:center; transition:all .3s; cursor:pointer; background:var(--gray-50);">
+                        <i class="fas fa-file-arrow-up" style="font-size:3rem; color:var(--primary-400); margin-bottom:16px;"></i>
+                        <p style="font-weight:600; color:var(--gray-700);">Drag & drop your file here</p>
+                        <p style="color:var(--gray-400); font-size:0.85rem; margin-top:4px;">or click to browse — PDF, CSV up to 10MB</p>
+                        {{ form.file }}
+                    </div>
+                    {% if form.file.errors %}<div class="form-error">{{ form.file.errors }}</div>{% endif %}
+                </div>
+                <button type="submit" class="btn btn-primary btn-block btn-lg">
+                    <span class="spinner"></span>
+                    <span class="btn-text">Upload & Parse</span>
+                </button>
+            </form>
+
+            <div style="margin-top:32px; padding:20px; background:var(--primary-50); border-radius:12px;">
+                <h4 style="font-size:0.95rem; margin-bottom:12px; color:var(--primary-700);">
+                    <i class="fas fa-circle-info"></i> Supported Formats
+                </h4>
+                <ul style="font-size:0.85rem; color:var(--gray-600); padding-left:20px; line-height:1.8;">
+                    <li>PDF bank statements with extractable tables</li>
+                    <li>CSV files with headers (Date, Description, Amount, etc.)</li>
+                    <li>Smart column detection for any bank format</li>
+                    <li>Automatic income/expense classification</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+</div>
+
+<nav class="bottom-nav">
+    <div class="bottom-nav-inner">
+        <a href="{% url 'dashboard' %}" class="bottom-nav-item"><i class="fas fa-gauge-high"></i> Home</a>
+        <a href="{% url 'expenses:list' %}" class="bottom-nav-item"><i class="fas fa-receipt"></i> Expenses</a>
+        <a href="{% url 'imports:upload' %}" class="bottom-nav-item active"><i class="fas fa-file-import"></i> Import</a>
+        <a href="{% url 'expenses:reports' %}" class="bottom-nav-item"><i class="fas fa-chart-line"></i> Reports</a>
+        <a href="{% url 'users:profile' %}" class="bottom-nav-item"><i class="fas fa-user"></i> Profile</a>
+    </div>
+</nav>
+{% endblock %}

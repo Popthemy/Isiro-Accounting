@@ -1,0 +1,219 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Dashboard — Isiro{% endblock %}
+
+{% block body_class %}app-page{% endblock %}
+
+{% block content %}
+<div class="app-layout">
+    {% include "partials/sidebar.html" with active="dashboard" unread_count=unread_count %}
+
+    <main class="main-content">
+        <div class="topbar">
+            <div style="display:flex; align-items:center; gap:16px;">
+                <button class="menu-toggle"><i class="fas fa-bars"></i></button>
+                <div>
+                    <h1>Welcome, {{ user.full_name|default:user.email }}</h1>
+                    <p style="color:var(--gray-500); font-size:0.9rem; margin-top:4px;">{{ today|date:"l, d F Y" }}</p>
+                </div>
+            </div>
+            <div class="topbar-actions">
+                <a href="{% url 'notifications:list' %}" class="notification-bell btn btn-ghost btn-sm" title="Notifications">
+                    <i class="fas fa-bell"></i>
+                    {% if unread_count %}<span class="notification-badge">{{ unread_count }}</span>{% endif %}
+                </a>
+                <a href="{% url 'users:profile' %}" class="user-avatar" title="Profile">{{ user.initials }}</a>
+            </div>
+        </div>
+
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }}">
+            <i class="fas fa-{% if message.tags == 'success' %}circle-check{% elif message.tags == 'error' %}circle-xmark{% elif message.tags == 'warning' %}triangle-exclamation{% else %}circle-info{% endif %}"></i>
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        <!-- Quick actions -->
+        <div class="quick-actions">
+            <a href="{% url 'expenses:add' %}" class="quick-action"><i class="fas fa-minus-circle" style="color:var(--danger-500);"></i> Add Expense</a>
+            <a href="{% url 'income:income_add' %}" class="quick-action"><i class="fas fa-plus-circle" style="color:var(--success-500);"></i> Add Income</a>
+            <a href="{% url 'imports:upload' %}" class="quick-action"><i class="fas fa-file-import" style="color:var(--primary-600);"></i> Upload Statement</a>
+            <a href="{% url 'budgets:add' %}" class="quick-action"><i class="fas fa-piggy-bank" style="color:var(--warning-500);"></i> Create Budget</a>
+        </div>
+
+        <!-- Stat cards -->
+        <div class="stat-grid">
+            <div class="stat-card">
+                <div class="stat-icon balance"><i class="fas fa-wallet"></i></div>
+                <div class="stat-label">Total Balance</div>
+                <div class="stat-value">{{ stats.total_balance|floatformat:2 }}</div>
+                <div class="stat-sub">{{ currency }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon income"><i class="fas fa-arrow-up"></i></div>
+                <div class="stat-label">Total Income (This Month)</div>
+                <div class="stat-value">{{ stats.total_income|floatformat:2 }}</div>
+                <div class="stat-sub">{{ currency }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon expense"><i class="fas fa-arrow-down"></i></div>
+                <div class="stat-label">Total Expenses (This Month)</div>
+                <div class="stat-value">{{ stats.month_expenses|floatformat:2 }}</div>
+                <div class="stat-sub">{{ currency }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon savings"><i class="fas fa-bullseye"></i></div>
+                <div class="stat-label">Remaining Budget</div>
+                <div class="stat-value">{{ stats.remaining_budget|floatformat:2 }}</div>
+                <div class="stat-sub">{{ currency }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon savings"><i class="fas fa-piggy-bank"></i></div>
+                <div class="stat-label">Savings</div>
+                <div class="stat-value">{{ stats.savings_amount|floatformat:2 }}</div>
+                <div class="stat-sub">{{ stats.savings_pct }}% of income</div>
+            </div>
+        </div>
+
+        <!-- Budget widget -->
+        {% if budgets %}
+        <div class="chart-card" style="margin-bottom:24px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h3>Active Budgets</h3>
+                <a href="{% url 'budgets:list' %}" class="btn btn-ghost btn-sm">View All <i class="fas fa-arrow-right"></i></a>
+            </div>
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:16px;">
+                {% for b in budgets %}
+                <div class="budget-card {% if b.is_exceeded %}exceeded{% elif b.is_warning %}warning{% endif %}">
+                    <div class="budget-header">
+                        <div>
+                            <h4>{{ b.name }}</h4>
+                            <span class="budget-category"><span class="cat-dot" style="background:{{ b.category.color }};"></span>{{ b.category.name }}</span>
+                        </div>
+                        {% if b.is_exceeded %}
+                        <span class="badge badge-expense"><i class="fas fa-triangle-exclamation"></i> Exceeded</span>
+                        {% elif b.is_warning %}
+                        <span class="badge" style="background:var(--warning-50); color:var(--warning-600);"><i class="fas fa-triangle-exclamation"></i> Warning</span>
+                        {% endif %}
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill {% if b.is_exceeded %}exceeded{% elif b.is_warning %}warning{% else %}normal{% endif %}" style="width:{{ b.spent_percentage }}%;"></div>
+                    </div>
+                    <div class="budget-stats">
+                        <span class="spent">{{ b.spent_amount|floatformat:2 }} / {{ b.amount_limit|floatformat:2 }} {{ currency }}</span>
+                        <span class="remaining">{{ b.remaining|floatformat:2 }} {{ currency }} left</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Charts -->
+        <div class="chart-grid">
+            <div class="chart-card">
+                <h3>Category Spending Breakdown</h3>
+                <div class="chart-container">
+                    <canvas id="pieChart"
+                        data-chart='{"labels": [{% for d in pie_data %}"{{ d.0 }}"{% if not forloop.last %},{% endif %}{% endfor %}],
+                                    "values": [{% for d in pie_data %}{{ d.2 }}{% if not forloop.last %},{% endif %}{% endfor %}],
+                                    "colors": [{% for d in pie_data %}"{{ d.1 }}"{% if not forloop.last %},{% endif %}{% endfor %}]}'></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <h3>Monthly Expense Trend</h3>
+                <div class="chart-container">
+                    <canvas id="lineChart"
+                        data-chart='{"labels": [{% for label, val in line_data.items %}"{{ label }}"{% if not forloop.last %},{% endif %}{% endfor %}],
+                                    "values": [{% for label, val in line_data.items %}{{ val }}{% if not forloop.last %},{% endif %}{% endfor %}]}'></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="chart-grid" style="grid-template-columns: 1fr;">
+            <div class="chart-card">
+                <h3>Income vs Expenses</h3>
+                <div class="chart-container" style="height:200px;">
+                    <canvas id="barChart"
+                        data-chart='{"labels": [{% for label, val in bar_data.items %}"{{ label }}"{% if not forloop.last %},{% endif %}{% endfor %}],
+                                    "values": [{% for label, val in bar_data.items %}{{ val }}{% if not forloop.last %},{% endif %}{% endfor %}]}'></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent transactions -->
+        <div class="txn-section">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h3>Recent Transactions</h3>
+                <a href="{% url 'expenses:list' %}" class="btn btn-ghost btn-sm">View All <i class="fas fa-arrow-right"></i></a>
+            </div>
+            {% if recent %}
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Category</th>
+                            <th>Description</th>
+                            <th>Amount</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for t in recent %}
+                        <tr>
+                            <td>{{ t.date|date:"d M Y" }}</td>
+                            <td>
+                                {% if t.category %}
+                                <span class="cat-dot" style="background:{{ t.category.color }};"></span>{{ t.category.name }}
+                                {% else %}
+                                <span class="cat-dot" style="background:#D1D5DB;"></span>Uncategorised
+                                {% endif %}
+                            </td>
+                            <td><a href="{% url 'expenses:detail' t.id %}" style="color:inherit;">{{ t.description|default:"—" }}</a></td>
+                            <td class="{% if t.transaction_type == 'expense' %}amount-expense{% else %}amount-income{% endif %}">
+                                {% if t.transaction_type == 'expense' %}-{% endif %}{{ t.amount|floatformat:2 }}
+                            </td>
+                            <td>
+                                <span class="badge badge-{{ t.transaction_type }}">
+                                    <i class="fas fa-{% if t.transaction_type == 'expense' %}minus{% else %}plus{% endif %}"></i>
+                                    {{ t.transaction_type|title }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge badge-source">{{ t.get_status_display }}</span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-inbox"></i>
+                <h3>No transactions yet</h3>
+                <p>Add your first transaction or import a bank statement to get started.</p>
+                <a href="{% url 'expenses:add' %}" class="btn btn-primary" style="margin-top:16px;">
+                    <span class="btn-text">Add Transaction</span>
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </main>
+</div>
+
+{% include "partials/bottom_nav.html" with active="dashboard" %}
+
+<div class="loading-overlay" id="loading-overlay">
+    <div class="spinner-lg"></div>
+    <p>Processing...</p>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+{% endblock %}

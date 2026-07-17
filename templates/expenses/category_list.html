@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Categories — Isiro{% endblock %}
+
+{% block body_class %}app-page{% endblock %}
+
+{% block content %}
+<div class="app-layout">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <a href="{% url 'landing' %}" class="logo"><i class="fas fa-wallet"></i> Isiro</a>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="{% url 'dashboard' %}" class="nav-item"><i class="fas fa-gauge-high"></i> Dashboard</a>
+            <a href="{% url 'expenses:list' %}" class="nav-item"><i class="fas fa-receipt"></i> Expenses</a>
+            <a href="{% url 'imports:upload' %}" class="nav-item"><i class="fas fa-file-import"></i> Import Statement</a>
+            <a href="{% url 'expenses:categories' %}" class="nav-item active"><i class="fas fa-tags"></i> Categories</a>
+            <a href="{% url 'expenses:reports' %}" class="nav-item"><i class="fas fa-chart-line"></i> Reports</a>
+            <a href="{% url 'users:profile' %}" class="nav-item"><i class="fas fa-user"></i> Profile</a>
+        </nav>
+        <div class="sidebar-footer">
+            <form method="post" action="{% url 'users:logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="nav-item" style="width:100%; border:none; background:none; text-align:left;">
+                    <i class="fas fa-right-from-bracket"></i> Logout
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div class="topbar">
+            <div style="display:flex; align-items:center; gap:16px;">
+                <button class="menu-toggle"><i class="fas fa-bars"></i></button>
+                <h1>Categories</h1>
+            </div>
+        </div>
+
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }}">
+            <i class="fas fa-{% if message.tags == 'success' %}circle-check{% elif message.tags == 'error' %}circle-xmark{% else %}circle-info{% endif %}"></i>
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        <div style="display:grid; grid-template-columns:1fr 2fr; gap:24px;">
+            <!-- Create category -->
+            <div class="card">
+                <h3 style="margin-bottom:20px;"><i class="fas fa-plus-circle" style="color:var(--primary-600);"></i> New Category</h3>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label class="form-label">Name</label>
+                        {{ form.name }}
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Icon (Font Awesome)</label>
+                        {{ form.icon }}
+                        <div class="form-help">e.g. fa-shopping-cart, fa-utensils, fa-car</div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Color</label>
+                        {{ form.color }}
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">
+                        <span class="spinner"></span><span class="btn-text">Create Category</span>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Category list -->
+            <div class="card">
+                <h3 style="margin-bottom:20px;">Your Categories</h3>
+                {% if categories %}
+                <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(180px, 1fr)); gap:12px;">
+                    {% for c in categories %}
+                    <div class="card card-hover" style="padding:16px; text-align:center; border-width:1px;">
+                        <div style="width:48px; height:48px; border-radius:12px; background:{{ c.color }}20; color:{{ c.color }}; display:flex; align-items:center; justify-content:center; margin:0 auto 12px; font-size:1.2rem;">
+                            <i class="fas {{ c.icon }}"></i>
+                        </div>
+                        <strong>{{ c.name }}</strong>
+                        {% if c.is_default %}
+                        <span class="badge badge-source" style="margin-top:8px;">Default</span>
+                        {% endif %}
+                        <div style="display:flex; gap:8px; justify-content:center; margin-top:12px;">
+                            <a href="{% url 'expenses:category_edit' c.id %}" class="btn btn-ghost btn-sm" title="Edit">
+                                <i class="fas fa-pen"></i>
+                            </a>
+                            <a href="{% url 'expenses:category_delete' c.id %}" class="btn btn-ghost btn-sm" title="Delete" style="color:var(--danger-500);">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-tags"></i>
+                    <h3>No categories yet</h3>
+                    <p>Create your first category using the form on the left.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+</div>
+
+<nav class="bottom-nav">
+    <div class="bottom-nav-inner">
+        <a href="{% url 'dashboard' %}" class="bottom-nav-item"><i class="fas fa-gauge-high"></i> Home</a>
+        <a href="{% url 'expenses:list' %}" class="bottom-nav-item"><i class="fas fa-receipt"></i> Expenses</a>
+        <a href="{% url 'imports:upload' %}" class="bottom-nav-item"><i class="fas fa-file-import"></i> Import</a>
+        <a href="{% url 'expenses:reports' %}" class="bottom-nav-item"><i class="fas fa-chart-line"></i> Reports</a>
+        <a href="{% url 'users:profile' %}" class="bottom-nav-item"><i class="fas fa-user"></i> Profile</a>
+    </div>
+</nav>
+{% endblock %}

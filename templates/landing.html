@@ -1,0 +1,264 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Isiro — Track Every Penny, Build Your Future{% endblock %}
+
+{% block body_class %}landing-page{% endblock %}
+
+{% block content %}
+<!-- Navigation -->
+<nav class="landing-nav">
+    <div class="nav-inner">
+        <a href="{% url 'landing' %}" class="logo">
+            <i class="fas fa-wallet"></i> Isiro
+        </a>
+        <div class="nav-links">
+            <a href="#hero">Home</a>
+            <a href="#features">Features</a>
+            <a href="#how-it-works">How It Works</a>
+            <a href="#pricing">Pricing</a>
+        </div>
+        <div class="nav-cta">
+            <a href="{% url 'users:login' %}" class="btn btn-ghost btn-sm">Login</a>
+            <a href="{% url 'users:signup' %}" class="btn btn-primary btn-sm">
+                <span class="spinner"></span>
+                <span class="btn-text">Get Started</span>
+            </a>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero" id="hero">
+    <h1>Track Every Penny, <span class="gradient-text">Build Your Future</span></h1>
+    <p>Manage expenses, import bank statements, and understand your spending habits with intelligent financial insights.</p>
+    <div class="hero-cta">
+        <a href="{% url 'users:signup' %}" class="btn btn-primary btn-lg">
+            <span class="spinner"></span>
+            <span class="btn-text">Get Started — It's Free</span>
+        </a>
+        <a href="{% url 'users:login' %}" class="btn btn-secondary btn-lg">
+            <span class="btn-text">Login</span>
+        </a>
+    </div>
+</section>
+
+<!-- Features -->
+<section class="section" id="features">
+    <div class="section-title">
+        <h2>Everything You Need to Manage Money</h2>
+        <p>Powerful tools to track, import, and analyse your finances in one place.</p>
+    </div>
+    <div class="features-grid">
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-hand-holding-dollar"></i></div>
+            <h3>Manual Expense Tracking</h3>
+            <p>Log transactions quickly with smart categories and descriptions.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-file-pdf"></i></div>
+            <h3>PDF Bank Statement Import</h3>
+            <p>Upload your bank statement and let Isiro extract transactions automatically.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-file-csv"></i></div>
+            <h3>CSV Import</h3>
+            <p>Import transactions from CSV files with smart column detection.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-scanner"></i></div>
+            <h3>OCR Extraction</h3>
+            <p>Extract text from scanned documents with Tesseract OCR technology.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-chart-pie"></i></div>
+            <h3>Spending Analytics</h3>
+            <p>Visualise your spending with interactive charts and breakdowns.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-piggy-bank"></i></div>
+            <h3>Budget Management</h3>
+            <p>Set budgets per category and track your progress in real time.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-file-export"></i></div>
+            <h3>Reports Export</h3>
+            <p>Export your financial reports as PDF or CSV for your records.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-shield-halved"></i></div>
+            <h3>Secure & Private</h3>
+            <p>Your financial data is protected and visible only to you.</p>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works -->
+<section class="section" id="how-it-works" style="background: var(--gray-50);">
+    <div class="section-title">
+        <h2>How It Works</h2>
+        <p>From upload to insight in four simple steps.</p>
+    </div>
+    <div class="steps-grid">
+        <div class="step-card">
+            <div class="step-number">1</div>
+            <h4>Upload Bank Statement</h4>
+            <p>Drag and drop your PDF or CSV bank statement file.</p>
+        </div>
+        <div class="step-card">
+            <div class="step-number">2</div>
+            <h4>System Extracts Transactions</h4>
+            <p>Isiro parses the file and intelligently maps bank columns.</p>
+        </div>
+        <div class="step-card">
+            <div class="step-number">3</div>
+            <h4>Review and Categorise</h4>
+            <p>Edit categories, fix types, and remove unwanted rows.</p>
+        </div>
+        <div class="step-card">
+            <div class="step-number">4</div>
+            <h4>Track Spending Insights</h4>
+            <p>View dashboards and reports with your full financial picture.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Preview Dashboard -->
+<section class="section">
+    <div class="section-title">
+        <h2>Your Finances at a Glance</h2>
+        <p>A premium dashboard built for clarity and insight.</p>
+    </div>
+    <div class="preview-mockup">
+        <div class="mockup-header">
+            <span class="mockup-dot" style="background: #EF4444;"></span>
+            <span class="mockup-dot" style="background: #F59E0B;"></span>
+            <span class="mockup-dot" style="background: #10B981;"></span>
+        </div>
+        <div class="mockup-body">
+            <div class="stat-grid">
+                <div class="stat-card">
+                    <div class="stat-icon expense"><i class="fas fa-arrow-down"></i></div>
+                    <div class="stat-label">This Month Expenses</div>
+                    <div class="stat-value">$2,340</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon income"><i class="fas fa-arrow-up"></i></div>
+                    <div class="stat-label">Total Income</div>
+                    <div class="stat-value">$5,200</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon balance"><i class="fas fa-wallet"></i></div>
+                    <div class="stat-label">Remaining Balance</div>
+                    <div class="stat-value">$2,860</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon savings"><i class="fas fa-piggy-bank"></i></div>
+                    <div class="stat-label">Savings Rate</div>
+                    <div class="stat-value">55%</div>
+                </div>
+            </div>
+            <div class="chart-grid">
+                <div class="chart-card">
+                    <h3>Expense by Category</h3>
+                    <div style="display:flex; flex-direction:column; gap:12px; padding:20px 0;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <span><span class="cat-dot" style="background:#4F46E5;"></span>Food</span>
+                            <strong>$680</strong>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <span><span class="cat-dot" style="background:#10B981;"></span>Transport</span>
+                            <strong>$420</strong>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <span><span class="cat-dot" style="background:#EF4444;"></span>Shopping</span>
+                            <strong>$590</strong>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <span><span class="cat-dot" style="background:#F59E0B;"></span>Bills</span>
+                            <strong>$650</strong>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <h3>Monthly Spending Trend</h3>
+                    <div style="height:200px; display:flex; align-items:flex-end; gap:16px; padding-top:20px;">
+                        <div style="flex:1; background:linear-gradient(180deg,#4F46E5,#818CF8); border-radius:8px 8px 0 0; height:60%;"></div>
+                        <div style="flex:1; background:linear-gradient(180deg,#4F46E5,#818CF8); border-radius:8px 8px 0 0; height:75%;"></div>
+                        <div style="flex:1; background:linear-gradient(180deg,#4F46E5,#818CF8); border-radius:8px 8px 0 0; height:45%;"></div>
+                        <div style="flex:1; background:linear-gradient(180deg,#4F46E5,#818CF8); border-radius:8px 8px 0 0; height:90%;"></div>
+                        <div style="flex:1; background:linear-gradient(180deg,#4F46E5,#818CF8); border-radius:8px 8px 0 0; height:55%;"></div>
+                        <div style="flex:1; background:linear-gradient(180deg,#4F46E5,#818CF8); border-radius:8px 8px 0 0; height:70%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Pricing placeholder -->
+<section class="section" id="pricing" style="background: var(--gray-50);">
+    <div class="section-title">
+        <h2>Simple, Transparent Pricing</h2>
+        <p>Start free. Upgrade when you need more.</p>
+    </div>
+    <div class="features-grid" style="max-width:900px; margin:0 auto;">
+        <div class="feature-card" style="text-align:center;">
+            <h3>Free</h3>
+            <p style="font-size:2rem; font-weight:800; color:var(--primary-600); margin:16px 0;">$0</p>
+            <p>Manual tracking, basic charts, up to 50 transactions/month.</p>
+            <a href="{% url 'users:signup' %}" class="btn btn-secondary btn-block" style="margin-top:20px;">
+                <span class="btn-text">Get Started</span>
+            </a>
+        </div>
+        <div class="feature-card" style="text-align:center; border:2px solid var(--primary-600);">
+            <h3>Pro</h3>
+            <p style="font-size:2rem; font-weight:800; color:var(--primary-600); margin:16px 0;">$9<span style="font-size:1rem; color:var(--gray-500);">/mo</span></p>
+            <p>Unlimited transactions, PDF/CSV import, OCR, advanced reports.</p>
+            <a href="{% url 'users:signup' %}" class="btn btn-primary btn-block" style="margin-top:20px;">
+                <span class="spinner"></span>
+                <span class="btn-text">Start Pro Trial</span>
+            </a>
+        </div>
+        <div class="feature-card" style="text-align:center;">
+            <h3>Business</h3>
+            <p style="font-size:2rem; font-weight:800; color:var(--primary-600); margin:16px 0;">$29<span style="font-size:1rem; color:var(--gray-500);">/mo</span></p>
+            <p>Multi-user, team budgets, priority support, API access.</p>
+            <a href="{% url 'users:signup' %}" class="btn btn-secondary btn-block" style="margin-top:20px;">
+                <span class="btn-text">Contact Us</span>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="landing-footer">
+    <div class="footer-inner">
+        <div class="footer-brand">
+            <div class="logo"><i class="fas fa-wallet"></i> Isiro</div>
+            <p style="font-size:0.9rem; max-width:300px;">Premium expense tracking and financial insights for individuals and small businesses.</p>
+        </div>
+        <div class="footer-col">
+            <h5>Product</h5>
+            <a href="#features">Features</a>
+            <a href="#how-it-works">How It Works</a>
+            <a href="#pricing">Pricing</a>
+        </div>
+        <div class="footer-col">
+            <h5>Company</h5>
+            <a href="#">About</a>
+            <a href="#">Contact</a>
+            <a href="#">Blog</a>
+        </div>
+        <div class="footer-col">
+            <h5>Legal</h5>
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Service</a>
+            <a href="#">Cookie Policy</a>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>&copy; {% now "Y" %} Isiro. All rights reserved. Built for a final-year project defense.</p>
+    </div>
+</footer>
+{% endblock %}

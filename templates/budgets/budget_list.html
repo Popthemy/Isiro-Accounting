@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Budgets — Isiro{% endblock %}
+
+{% block body_class %}app-page{% endblock %}
+
+{% block content %}
+<div class="app-layout">
+    {% include "partials/sidebar.html" with active="budgets" %}
+
+    <main class="main-content">
+        <div class="topbar">
+            <div style="display:flex; align-items:center; gap:16px;">
+                <button class="menu-toggle"><i class="fas fa-bars"></i></button>
+                <h1>Budgets</h1>
+            </div>
+            <div class="topbar-actions">
+                <a href="{% url 'budgets:add' %}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus"></i> Create Budget
+                </a>
+            </div>
+        </div>
+
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }}">
+            <i class="fas fa-{% if message.tags == 'success' %}circle-check{% elif message.tags == 'error' %}circle-xmark{% else %}circle-info{% endif %}"></i>
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        {% if budgets %}
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:20px;">
+            {% for b in budgets %}
+            <div class="budget-card {% if b.is_exceeded %}exceeded{% elif b.is_warning %}warning{% endif %}">
+                <div class="budget-header">
+                    <div>
+                        <h4>{{ b.name }}</h4>
+                        <span class="budget-category"><span class="cat-dot" style="background:{{ b.category.color }};"></span>{{ b.category.name }}</span>
+                    </div>
+                    {% if b.is_exceeded %}
+                    <span class="badge badge-expense"><i class="fas fa-triangle-exclamation"></i> Exceeded</span>
+                    {% elif b.is_warning %}
+                    <span class="badge" style="background:var(--warning-50); color:var(--warning-600);"><i class="fas fa-triangle-exclamation"></i> Warning</span>
+                    {% endif %}
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill {% if b.is_exceeded %}exceeded{% elif b.is_warning %}warning{% else %}normal{% endif %}" style="width:{{ b.spent_percentage }}%;"></div>
+                </div>
+                <div class="budget-stats">
+                    <span class="spent">{{ b.spent_amount|floatformat:2 }} / {{ b.amount_limit|floatformat:2 }} {{ currency }}</span>
+                    <span class="remaining">{{ b.remaining|floatformat:2 }} {{ currency }} left</span>
+                </div>
+                <div style="display:flex; gap:8px; margin-top:16px;">
+                    <a href="{% url 'budgets:detail' b.id %}" class="btn btn-ghost btn-sm"><i class="fas fa-eye"></i> View</a>
+                    <a href="{% url 'budgets:edit' b.id %}" class="btn btn-ghost btn-sm"><i class="fas fa-pen"></i> Edit</a>
+                    <a href="{% url 'budgets:delete' b.id %}" class="btn btn-ghost btn-sm" style="color:var(--danger-500);"><i class="fas fa-trash"></i></a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-piggy-bank"></i>
+            <h3>No budgets yet</h3>
+            <p>Create a budget to track your spending limits per category.</p>
+            <a href="{% url 'budgets:add' %}" class="btn btn-primary" style="margin-top:16px;">
+                <span class="btn-text">Create Budget</span>
+            </a>
+        </div>
+        {% endif %}
+    </main>
+</div>
+
+{% include "partials/bottom_nav.html" with active="budgets" %}
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Notifications — Isiro{% endblock %}
+
+{% block body_class %}app-page{% endblock %}
+
+{% block content %}
+<div class="app-layout">
+    {% include "partials/sidebar.html" with active="notifications" unread_count=unread_count %}
+
+    <main class="main-content">
+        <div class="topbar">
+            <div style="display:flex; align-items:center; gap:16px;">
+                <button class="menu-toggle"><i class="fas fa-bars"></i></button>
+                <h1>Notifications</h1>
+            </div>
+            <div class="topbar-actions">
+                {% if unread_count %}
+                <form method="post" action="{% url 'notifications:mark_all_read' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-secondary btn-sm">
+                        <i class="fas fa-check-double"></i> Mark All Read
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }}"><i class="fas fa-circle-info"></i> {{ message }}</div>
+        {% endfor %}
+        {% endif %}
+
+        <div class="card" style="max-width:800px;">
+            {% if notifications %}
+            <div style="display:flex; flex-direction:column;">
+                {% for n in notifications %}
+                <div class="notification-item {% if not n.is_read %}unread{% endif %}">
+                    <div class="notification-icon {{ n.type }}">
+                        <i class="fas fa-{% if n.type == 'success' %}circle-check{% elif n.type == 'error' %}circle-xmark{% elif n.type == 'warning' %}triangle-exclamation{% elif n.type == 'budget' %}piggy-bank{% elif n.type == 'import' %}file-import{% else %}circle-info{% endif %}"></i>
+                    </div>
+                    <div class="notification-content">
+                        <div class="title">{{ n.title }}</div>
+                        <div class="message">{{ n.message }}</div>
+                        <div class="time">{{ n.created_at|date:"d M Y, H:i" }}</div>
+                    </div>
+                    {% if not n.is_read %}
+                    <form method="post" action="{% url 'notifications:mark_read' n.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-ghost btn-sm" title="Mark as read">
+                            <i class="fas fa-check"></i>
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-bell-slash"></i>
+                <h3>No notifications</h3>
+                <p>You're all caught up! Notifications about budgets, imports, and more will appear here.</p>
+            </div>
+            {% endif %}
+        </div>
+    </main>
+</div>
+
+{% include "partials/bottom_nav.html" with active="notifications" %}
+{% endblock %}

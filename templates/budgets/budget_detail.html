@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Budget Details — Isiro{% endblock %}
+
+{% block body_class %}app-page{% endblock %}
+
+{% block content %}
+<div class="app-layout">
+    {% include "partials/sidebar.html" with active="budgets" %}
+
+    <main class="main-content">
+        <div class="topbar">
+            <div style="display:flex; align-items:center; gap:16px;">
+                <button class="menu-toggle"><i class="fas fa-bars"></i></button>
+                <h1>{{ budget.name }}</h1>
+            </div>
+            <div class="topbar-actions">
+                <a href="{% url 'budgets:list' %}" class="btn btn-ghost btn-sm"><i class="fas fa-arrow-left"></i> Back</a>
+            </div>
+        </div>
+
+        {% if budget.is_exceeded %}
+        <div class="alert alert-error">
+            <i class="fas fa-triangle-exclamation"></i> This budget has been exceeded! You've spent {{ budget.spent_amount|floatformat:2 }} {{ currency }} out of {{ budget.amount_limit|floatformat:2 }}.
+        </div>
+        {% elif budget.is_warning %}
+        <div class="alert alert-warning">
+            <i class="fas fa-triangle-exclamation"></i> You've used {{ budget.spent_percentage }}% of this budget. Approaching the limit.
+        </div>
+        {% endif %}
+
+        <div class="card" style="margin-bottom:24px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <div>
+                    <h3>Budget Progress</h3>
+                    <span class="budget-category"><span class="cat-dot" style="background:{{ budget.category.color }};"></span>{{ budget.category.name }}</span>
+                </div>
+                <span class="badge badge-source">{{ budget.get_period_type_display }}</span>
+            </div>
+            <div class="progress-bar" style="height:16px;">
+                <div class="progress-fill {% if budget.is_exceeded %}exceeded{% elif budget.is_warning %}warning{% else %}normal{% endif %}" style="width:{{ budget.spent_percentage }}%;"></div>
+            </div>
+            <div class="budget-stats" style="margin-top:12px; font-size:1rem;">
+                <span class="spent">{{ budget.spent_amount|floatformat:2 }} / {{ budget.amount_limit|floatformat:2 }} {{ currency }}</span>
+                <span class="remaining">{{ budget.remaining|floatformat:2 }} {{ currency }} remaining</span>
+            </div>
+            <p style="color:var(--gray-500); font-size:0.85rem; margin-top:12px;">
+                Period: {{ budget.start_date|date:"d M Y" }} — {{ budget.end_date|date:"d M Y" }}
+            </p>
+        </div>
+
+        <div class="txn-section">
+            <h3 style="margin-bottom:20px;">Transactions Affecting This Budget</h3>
+            {% if transactions %}
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead>
+                        <tr><th>Date</th><th>Description</th><th>Amount</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for t in transactions %}
+                        <tr>
+                            <td>{{ t.date|date:"d M Y" }}</td>
+                            <td>{{ t.description|default:"—" }}</td>
+                            <td class="amount-expense">-{{ t.amount|floatformat:2 }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-receipt"></i>
+                <h3>No transactions yet</h3>
+                <p>No expenses in this category during the budget period.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <div style="display:flex; gap:12px; margin-top:24px;">
+            <a href="{% url 'budgets:edit' budget.id %}" class="btn btn-primary"><span class="btn-text">Edit Budget</span></a>
+            <a href="{% url 'budgets:delete' budget.id %}" class="btn btn-danger"><span class="btn-text">Delete Budget</span></a>
+        </div>
+    </main>
+</div>
+
+{% include "partials/bottom_nav.html" with active="budgets" %}
+{% endblock %}

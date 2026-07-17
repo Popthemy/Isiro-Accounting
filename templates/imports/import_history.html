@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Import History — Isiro{% endblock %}
+
+{% block body_class %}app-page{% endblock %}
+
+{% block content %}
+<div class="app-layout">
+    {% include "partials/sidebar.html" with active="imports" %}
+
+    <main class="main-content">
+        <div class="topbar">
+            <div style="display:flex; align-items:center; gap:16px;">
+                <button class="menu-toggle"><i class="fas fa-bars"></i></button>
+                <h1>Import History</h1>
+            </div>
+            <div class="topbar-actions">
+                <a href="{% url 'imports:upload' %}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-upload"></i> New Import
+                </a>
+            </div>
+        </div>
+
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }}"><i class="fas fa-circle-info"></i> {{ message }}</div>
+        {% endfor %}
+        {% endif %}
+
+        <div class="txn-section">
+            {% if files %}
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>File Name</th>
+                            <th>Type</th>
+                            <th>Bank</th>
+                            <th>Transactions</th>
+                            <th>Status</th>
+                            <th>Uploaded</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for f in files %}
+                        <tr>
+                            <td><i class="fas fa-{% if f.file_type == 'pdf' %}file-pdf{% else %}file-csv{% endif %}" style="color:var(--{% if f.file_type == 'pdf' %}danger{% else %}success{% endif %}-500;"></i> {{ f.file_name }}</td>
+                            <td>{{ f.get_file_type_display }}</td>
+                            <td>{{ f.bank_name|default:"—" }}</td>
+                            <td>{{ f.row_count }}</td>
+                            <td>
+                                <span class="badge {% if f.status == 'completed' %}badge-success{% elif f.status == 'failed' %}badge-expense{% else %}badge-source{% endif %}">
+                                    {{ f.get_status_display }}
+                                </span>
+                            </td>
+                            <td>{{ f.uploaded_at|date:"d M Y, H:i" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-clock-rotate-left"></i>
+                <h3>No import history</h3>
+                <p>Files you import will appear here with their status and transaction count.</p>
+                <a href="{% url 'imports:upload' %}" class="btn btn-primary" style="margin-top:16px;">
+                    <span class="btn-text">Import a Statement</span>
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </main>
+</div>
+
+{% include "partials/bottom_nav.html" with active="imports" %}
+{% endblock %}

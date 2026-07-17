@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Expenses — Isiro{% endblock %}
+
+{% block body_class %}app-page{% endblock %}
+
+{% block content %}
+<div class="app-layout">
+    {% include "partials/sidebar.html" with active="expenses" %}
+
+    <main class="main-content">
+        <div class="topbar">
+            <div style="display:flex; align-items:center; gap:16px;">
+                <button class="menu-toggle"><i class="fas fa-bars"></i></button>
+                <h1>Expenses & Income</h1>
+            </div>
+            <div class="topbar-actions">
+                <a href="{% url 'expenses:add' %}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus"></i> Add Transaction
+                </a>
+            </div>
+        </div>
+
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }}">
+            <i class="fas fa-{% if message.tags == 'success' %}circle-check{% elif message.tags == 'error' %}circle-xmark{% else %}circle-info{% endif %}"></i>
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        <!-- Filters -->
+        <form method="get" class="filters filter-group">
+            <input type="text" name="q" class="form-input" placeholder="Search..." value="{{ request.GET.q }}">
+            <select name="type" class="form-input">
+                <option value="">All Types</option>
+                <option value="expense" {% if request.GET.type == 'expense' %}selected{% endif %}>Expense</option>
+                <option value="income" {% if request.GET.type == 'income' %}selected{% endif %}>Income</option>
+            </select>
+            <select name="category" class="form-input">
+                <option value="">All Categories</option>
+                {% for c in categories %}
+                <option value="{{ c.id }}" {% if request.GET.category|add:"0" == c.id %}selected{% endif %}>{{ c.name }}</option>
+                {% endfor %}
+            </select>
+            <input type="date" name="date_from" class="form-input" value="{{ request.GET.date_from }}" title="From date">
+            <input type="date" name="date_to" class="form-input" value="{{ request.GET.date_to }}" title="To date">
+            <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-filter"></i> Filter</button>
+            <a href="{% url 'expenses:list' %}" class="btn btn-ghost btn-sm">Clear</a>
+        </form>
+
+        <div class="txn-section">
+            {% if expenses %}
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th><th>Category</th><th>Description</th><th>Source</th>
+                            <th>Amount</th><th>Type</th><th>Status</th><th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for t in expenses %}
+                        <tr>
+                            <td>{{ t.date|date:"d M Y" }}</td>
+                            <td>{% if t.category %}<span class="cat-dot" style="background:{{ t.category.color }};"></span>{{ t.category.name }}{% else %}<span class="cat-dot" style="background:#D1D5DB;"></span>—{% endif %}</td>
+                            <td><a href="{% url 'expenses:detail' t.id %}" style="color:inherit;">{{ t.description|default:"—" }}</a></td>
+                            <td><span class="badge badge-source">{{ t.get_source_display }}</span></td>
+                            <td class="{% if t.transaction_type == 'expense' %}amount-expense{% else %}amount-income{% endif %}">{% if t.transaction_type == 'expense' %}-{% endif %}{{ t.amount|floatformat:2 }}</td>
+                            <td><span class="badge badge-{{ t.transaction_type }}"><i class="fas fa-{% if t.transaction_type == 'expense' %}minus{% else %}plus{% endif %}"></i> {{ t.transaction_type|title }}</span></td>
+                            <td><span class="badge badge-source">{{ t.get_status_display }}</span></td>
+                            <td>
+                                <a href="{% url 'expenses:detail' t.id %}" class="btn btn-ghost btn-sm" title="View"><i class="fas fa-eye"></i></a>
+                                <a href="{% url 'expenses:edit' t.id %}" class="btn btn-ghost btn-sm" title="Edit"><i class="fas fa-pen"></i></a>
+                                <a href="{% url 'expenses:delete' t.id %}" class="btn btn-ghost btn-sm" title="Delete" style="color:var(--danger-500);"><i class="fas fa-trash"></i></a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% if is_paginated %}
+            <div class="pagination">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}&q={{ request.GET.q }}&type={{ request.GET.type }}&category={{ request.GET.category }}&date_from={{ request.GET.date_from }}&date_to={{ request.GET.date_to }}" class="page-btn"><i class="fas fa-chevron-left"></i></a>
+                {% else %}
+                <span class="page-btn disabled"><i class="fas fa-chevron-left"></i></span>
+                {% endif %}
+                <span class="page-btn active">{{ page_obj.number }}</span>
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}&q={{ request.GET.q }}&type={{ request.GET.type }}&category={{ request.GET.category }}&date_from={{ request.GET.date_from }}&date_to={{ request.GET.date_to }}" class="page-btn"><i class="fas fa-chevron-right"></i></a>
+                {% else %}
+                <span class="page-btn disabled"><i class="fas fa-chevron-right"></i></span>
+                {% endif %}
+            </div>
+            {% endif %}
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-inbox"></i>
+                <h3>No transactions found</h3>
+                <p>Add a transaction or import a bank statement to get started.</p>
+                <div style="margin-top:20px; display:flex; gap:12px; justify-content:center;">
+                    <a href="{% url 'expenses:add' %}" class="btn btn-primary"><span class="btn-text">Add Transaction</span></a>
+                    <a href="{% url 'imports:upload' %}" class="btn btn-secondary"><span class="btn-text">Import Statement</span></a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </main>
+</div>
+
+{% include "partials/bottom_nav.html" with active="expenses" %}
+{% endblock %}
