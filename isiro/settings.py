@@ -6,8 +6,13 @@ configuration choice clearly.  Swap the DATABASES setting to PostgreSQL
 for production deployment (a one-line change).
 """
 
+from dotenv import load_dotenv
+
+# Load environment variables from .env
+import psycopg2
 from pathlib import Path
 import os
+load_dotenv()
 import dj_database_url  # Make sure to: pip install dj-database-url psycopg2-binary
 
 
@@ -96,6 +101,14 @@ else:
             "NAME": BASE_DIR / "db.sqlite3",
         }
     }
+
+# conn = psycopg2.connect(
+#     f"postgresql://postgres.herzxsdusfsijewyvcoj:{os.getenv('DB_PASS')}@aws-1-us-west-2.pooler.supabase.com:5432/postgres"
+# )
+
+# print(f"con {conn}")
+print(f'{os.getenv("DATABASE_URL")}')
+
 
 # PostgreSQL configuration (uncomment for production):
 # DATABASES = {
