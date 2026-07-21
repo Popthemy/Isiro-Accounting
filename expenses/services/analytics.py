@@ -10,7 +10,7 @@ from datetime import timedelta
 from django.db.models import Sum
 from django.utils import timezone
 
-from expenses.models import Expense
+from expenses.models import Expense, Wallet
 
 
 def _month_range(months_ago: int = 0):
@@ -28,7 +28,8 @@ def _month_range(months_ago: int = 0):
 def dashboard_stats(user):
     """Return the header-card figures for the dashboard."""
     start, end = _month_range(0)
-    qs = Expense.objects.filter(user=user, date__gte=start.date(), date__lte=end.date())
+    qs = Expense.objects.filter(
+        user=user, date__gte=start.date(), date__lte=end.date())
     expenses = qs.filter(transaction_type=Expense.TransactionType.EXPENSE).aggregate(
         t=Sum("amount"))["t"] or 0
     income = qs.filter(transaction_type=Expense.TransactionType.INCOME).aggregate(
@@ -37,15 +38,11 @@ def dashboard_stats(user):
     savings_pct = round((balance / income) * 100, 1) if income > 0 else 0
     savings_amount = balance if balance > 0 else 0
 
-    all_expenses = Expense.objects.filter(
-        user=user, transaction_type=Expense.TransactionType.EXPENSE).aggregate(
-        t=Sum("amount"))["t"] or 0
-    all_income = Expense.objects.filter(
-        user=user, transaction_type=Expense.TransactionType.INCOME).aggregate(
-        t=Sum("amount"))["t"] or 0
-    total_balance = all_income - all_expenses
+    total_balance = Wallet.objects.filter(user=user, is_active=True).aggregate(
+        t=Sum("current_balance"))["t"] or 0
 
-    remaining_budget = user.monthly_budget_preference - expenses if user.monthly_budget_preference else 0
+    remaining_budget = user.monthly_budget_preference - \
+        expenses if user.monthly_budget_preference else 0
 
     return {
         "month_expenses": expenses,

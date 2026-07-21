@@ -1,82 +1,93 @@
-{% extends "base.html" %}
-{% load static %}
+{% extends "base.html" %} 
 
-{% block title %}Add Expense — Isiro{% endblock %}
+{% load static %} 
 
-{% block body_class %}app-page{% endblock %}
+{% block title %}Add Expense —Isiro{% endblock %} 
+
+{% block body_class %}app-page{% endblock %} 
 
 {% block content %}
 <div class="app-layout">
-    {% include "partials/sidebar.html" with active="expenses" %}
+  {% include "partials/sidebar.html" with active="expenses" %}
 
-    <main class="main-content">
-        <div class="topbar">
-            <div style="display:flex; align-items:center; gap:16px;">
-                <button class="menu-toggle"><i class="fas fa-bars"></i></button>
-                <h1>Add Transaction</h1>
-            </div>
+  <main class="main-content">
+    <div class="topbar">
+      <div style="display: flex; align-items: center; gap: 16px">
+        <button class="menu-toggle"><i class="fas fa-bars"></i></button>
+        <h1>Add Transaction</h1>
+      </div>
+    </div>
+
+    {% if messages %} {% for message in messages %}
+    <div class="alert alert-{{ message.tags|default:'info' }}">
+      <i class="fas fa-circle-info"></i> {{ message }}
+    </div>
+    {% endfor %} {% endif %}
+
+    <div class="card" style="max-width: 600px">
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-group">
+          <label class="form-label">Wallet</label>
+          {{ form.wallet }} {% if form.wallet.errors %}
+          <div class="form-error">{{ form.wallet.errors }}</div>
+          {% endif %}
         </div>
-
-        {% if messages %}
-        {% for message in messages %}
-        <div class="alert alert-{{ message.tags|default:'info' }}"><i class="fas fa-circle-info"></i> {{ message }}</div>
-        {% endfor %}
-        {% endif %}
-
-        <div class="card" style="max-width:600px;">
-            <form method="post" enctype="multipart/form-data">
-                {% csrf_token %}
-                <div class="form-group">
-                    <label class="form-label">Transaction Type</label>
-                    {{ form.transaction_type }}
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Amount</label>
-                    {{ form.amount }}
-                    {% if form.amount.errors %}<div class="form-error">{{ form.amount.errors }}</div>{% endif %}
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Date</label>
-                    {{ form.date }}
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Category</label>
-                    {{ form.category }}
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Description</label>
-                    {{ form.description }}
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Payment Method</label>
-                    {{ form.payment_method }}
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Merchant Name (optional)</label>
-                    {{ form.merchant_name }}
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Location (optional)</label>
-                    {{ form.location }}
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Notes (optional)</label>
-                    {{ form.notes }}
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Receipt / Attachment (optional)</label>
-                    {{ form.attachment }}
-                </div>
-                <div style="display:flex; gap:12px;">
-                    <button type="submit" class="btn btn-primary">
-                        <span class="spinner"></span><span class="btn-text">Add Transaction</span>
-                    </button>
-                    <a href="{% url 'expenses:list' %}" class="btn btn-ghost"><span class="btn-text">Cancel</span></a>
-                </div>
-            </form>
+        <div class="form-group">
+          <label class="form-label">Transaction Type</label>
+          {{ form.transaction_type }}
         </div>
-    </main>
+        <div class="form-group">
+          <label class="form-label">Amount</label>
+          {{ form.amount }} {% if form.amount.errors %}
+          <div class="form-error">{{ form.amount.errors }}</div>
+          {% endif %}
+        </div>
+        <div class="form-group">
+          <label class="form-label">Date</label>
+          {{ form.date }}
+        </div>
+        <div class="form-group">
+          <label class="form-label">Category</label>
+          {{ form.category }}
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          {{ form.description }}
+        </div>
+        <div class="form-group">
+          <label class="form-label">Payment Method</label>
+          {{ form.payment_method }}
+        </div>
+        <div class="form-group">
+          <label class="form-label">Merchant Name (optional)</label>
+          {{ form.merchant_name }}
+        </div>
+        <div class="form-group">
+          <label class="form-label">Location (optional)</label>
+          {{ form.location }}
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notes (optional)</label>
+          {{ form.notes }}
+        </div>
+        <div class="form-group">
+          <label class="form-label">Receipt / Attachment (optional)</label>
+          {{ form.attachment }}
+        </div>
+        <div style="display: flex; gap: 12px">
+          <button type="submit" class="btn btn-primary">
+            <span class="spinner"></span
+            ><span class="btn-text">Add Transaction</span>
+          </button>
+          <a href="{% url 'expenses:list' %}" class="btn btn-ghost"
+            ><span class="btn-text">Cancel</span></a
+          >
+        </div>
+      </form>
+    </div>
+  </main>
 </div>
 
-{% include "partials/bottom_nav.html" with active="expenses" %}
+{% include "partials/bottom_nav.html" with active="expenses" %} 
 {% endblock %}

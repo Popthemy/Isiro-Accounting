@@ -1,0 +1,109 @@
+{% extends "base.html" %} {% load static %} 
+{% block title %}Wallets — Isiro{%endblock %} 
+{% block body_class %}app-page{% endblock %} 
+{% block content %}
+<div class="app-layout">
+  {% include "partials/sidebar.html" with active="wallets" %}
+
+  <main class="main-content">
+    <div class="topbar">
+      <div style="display: flex; align-items: center; gap: 16px">
+        <button class="menu-toggle"><i class="fas fa-bars"></i></button>
+        <h1>Wallets</h1>
+      </div>
+      <div class="topbar-actions">
+        <a href="{% url 'expenses:wallet_add' %}" class="btn btn-primary btn-sm"
+          ><i class="fas fa-plus"></i> Add Wallet</a
+        >
+      </div>
+    </div>
+
+    {% if messages %} {% for message in messages %}
+    <div class="alert alert-{{ message.tags|default:'info' }}">
+      <i
+        class="fas fa-{% if message.tags == 'success' %}circle-check{% elif message.tags == 'error' %}circle-xmark{% elif message.tags == 'warning' %}triangle-exclamation{% else %}circle-info{% endif %}"
+      ></i>
+      {{ message }}
+    </div>
+    {% endfor %} {% endif %}
+
+    <div class="txn-section">
+      {% if wallets %}
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Type</th>
+              <th>Opening Balance</th>
+              <th>Current Balance</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for wallet in wallets %}
+              <tr>
+                <td>
+                  <a
+                    href="{% url 'expenses:wallet_detail' wallet.id %}"
+                    style="color: inherit"
+                    >{{ wallet.name }}</a
+                  >
+                </td>
+                <td>{{ wallet.get_account_type_display }}</td>
+                <td>
+                  {{ wallet.opening_balance|floatformat:2 }} {{ wallet.currency }}
+                </td>
+                <td class="amount-income">
+                  {{ wallet.current_balance|floatformat:2 }} {{ wallet.currency }}
+                </td>
+                <td>
+                  <span class="badge badge-source"
+                    >{% if wallet.is_active %}Active{% else %}Inactive{% endif %}</span
+                  >
+                </td>
+                <td>
+                  <a
+                    href="{% url 'expenses:wallet_detail' wallet.id %}"
+                    class="btn btn-ghost btn-sm"
+                    title="View"
+                    ><i class="fas fa-eye"></i
+                  ></a>
+                  <a
+                    href="{% url 'expenses:wallet_edit' wallet.id %}"
+                    class="btn btn-ghost btn-sm"
+                    title="Edit"
+                    ><i class="fas fa-pen"></i
+                  ></a>
+                  <a
+                    href="{% url 'expenses:wallet_delete' wallet.id %}"
+                    class="btn btn-ghost btn-sm"
+                    title="Delete"
+                    style="color: var(--danger-500)"
+                    ><i class="fas fa-trash"></i
+                  ></a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="empty-state">
+        <i class="fas fa-wallet"></i>
+        <h3>No wallets yet</h3>
+        <p>Create your first wallet or account to start tracking balances.</p>
+        <a
+          href="{% url 'expenses:wallet_add' %}"
+          class="btn btn-primary"
+          style="margin-top: 16px"
+          ><span class="btn-text">Add Wallet</span></a
+        >
+      </div>
+      {% endif %}
+    </div>
+  </main>
+</div>
+
+{% include "partials/bottom_nav.html" with active="wallets" %} {% endblock %}

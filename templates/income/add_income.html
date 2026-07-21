@@ -1,55 +1,86 @@
-{% extends "base.html" %}
-{% load static %}
+{% extends "base.html" %} 
+{% load static %} 
 
-{% block title %}Add Income — Isiro{% endblock %}
-
-{% block body_class %}app-page{% endblock %}
-
+{% block title %}Add Income —Isiro{% endblock %} 
+{% block body_class %}app-page{% endblock %} 
 {% block content %}
-<div class="app-layout">
+
+  <div class="app-layout">
     {% include "partials/sidebar.html" with active="income" %}
 
     <main class="main-content">
-        <div class="topbar">
-            <div style="display:flex; align-items:center; gap:16px;">
-                <button class="menu-toggle"><i class="fas fa-bars"></i></button>
-                <h1>Add Income</h1>
-            </div>
+      <div class="topbar">
+        <div style="display: flex; align-items: center; gap: 16px">
+          <button class="menu-toggle"><i class="fas fa-bars"></i></button>
+          <h1>Add Income</h1>
         </div>
+      </div>
 
-        {% if messages %}
+      {% if messages %} 
         {% for message in messages %}
-        <div class="alert alert-{{ message.tags|default:'info' }}"><i class="fas fa-circle-info"></i> {{ message }}</div>
-        {% endfor %}
+        <div class="alert alert-{{ message.tags|default:'info' }}">
+          <i class="fas fa-circle-info"></i> {{ message }}
+        </div>
+        {% endfor %} 
+      {% endif %}
+      <!-- error messages -->
+      <div>
+        {% if form.errors %}
+        <div class="alert alert-danger">
+          <i class="fas fa-exclamation-triangle"></i> {{ form.errors|join:", " }}
+        </div>
         {% endif %}
-         <!-- error messages -->
-        <div>
-            {% if form.errors %}
-                <div class="alert alert-danger">
-                    <i class="fas fa-exclamation-triangle"></i> {{ form.errors|join:", " }}
-                </div>
+      </div>
+
+      <div class="card" style="max-width: 600px">
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          <div class="form-group">
+            <label class="form-label">Wallet</label>{{ form.wallet }}
+            {% if form.wallet.errors %}
+              <div class="form-error">{{ form.wallet.errors }}</div>
             {% endif %}
-        </div>
-
-        <div class="card" style="max-width:600px;">
-            <form method="post" enctype="multipart/form-data">
-                {% csrf_token %}
-                <div class="form-group"><label class="form-label">Amount</label>{{ form.amount }}{% if form.amount.errors %}<div class="form-error">{{ form.amount.errors }}</div>{% endif %}</div>
-                <div class="form-group"><label class="form-label">Date</label>{{ form.date }}</div>
-                <div class="form-group"><label class="form-label">Income Source (Category)</label>{{ form.category }}</div>
-                <div class="form-help">e.g. For income: Salary, Freelance, Business, Investment, Gift, Interest, Refund, Bonus, Rental Income</div>
-                <div class="form-group"><label class="form-label">Description</label>{{ form.description }}</div>
-                <div class="form-group"><label class="form-label">Payment Method</label>{{ form.payment_method }}</div>
-                <div class="form-group"><label class="form-label">Receipt / Attachment (optional)</label>{{ form.attachment }}</div>
-                <div style="display:flex; gap:12px;">
-                    <button type="submit" class="btn btn-success"><span class="spinner"></span><span class="btn-text">Add Income</span></button>
-                    <a href="{% url 'income:income_list' %}" class="btn btn-ghost"><span class="btn-text">Cancel</span></a>
-                </div>
-               
-            </form>
-        </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Amount</label>{{ form.amount }}
+            {% if form.amount.errors %}
+              <div class="form-error">{{ form.amount.errors }}</div>
+            {% endif %}
+          </div>
+          <div class="form-group">
+            <label class="form-label">Date</label>{{ form.date }}
+          </div>
+          <div class="form-group">
+            <label class="form-label">Income Source (Category)</label>
+            {{ form.category }}
+          </div>
+          <div class="form-help">
+            e.g. For income: Salary, Freelance, Business, Investment, Gift,
+            Interest, Refund, Bonus, Rental Income
+          </div>
+          <div class="form-group">
+            <label class="form-label">Description</label>{{ form.description }}
+          </div>
+          <div class="form-group">
+            <label class="form-label">Payment Method</label>{{ form.payment_method }}
+          </div>
+          <div class="form-group">
+            <label class="form-label">Receipt / Attachment (optional)</label>
+            {{ form.attachment }}
+          </div>
+          <div style="display: flex; gap: 12px">
+            <button type="submit" class="btn btn-success">
+              <span class="spinner"></span
+              ><span class="btn-text">Add Income</span>
+            </button>
+            <a href="{% url 'income:income_list' %}" class="btn btn-ghost"
+              ><span class="btn-text">Cancel</span></a
+            >
+          </div>
+        </form>
+      </div>
     </main>
-</div>
+  </div>
 
-{% include "partials/bottom_nav.html" with active="income" %}
+  {% include "partials/bottom_nav.html" with active="income" %} 
 {% endblock %}

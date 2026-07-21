@@ -1,110 +1,148 @@
-{% extends "base.html" %}
+{% extends "base.html" %} 
+
 {% load static %}
 
-{% block title %}Transaction Details — Isiro{% endblock %}
+{% block title %}Transaction Details— Isiro{% endblock %} 
 
-{% block body_class %}app-page{% endblock %}
+{% block body_class %}app-page{% endblock %} 
 
 {% block content %}
 <div class="app-layout">
-    {% include "partials/sidebar.html" with active="expenses" %}
+  {% include "partials/sidebar.html" with active="expenses" %}
 
-    <main class="main-content">
-        <div class="topbar">
-            <div style="display:flex; align-items:center; gap:16px;">
-                <button class="menu-toggle"><i class="fas fa-bars"></i></button>
-                <h1>Transaction Details</h1>
-            </div>
-            <div class="topbar-actions">
-                <a href="{% url 'expenses:list' %}" class="btn btn-ghost btn-sm"><i class="fas fa-arrow-left"></i> Back</a>
-            </div>
+  <main class="main-content">
+    <div class="topbar">
+      <div style="display: flex; align-items: center; gap: 16px">
+        <button class="menu-toggle"><i class="fas fa-bars"></i></button>
+        <h1>Transaction Details</h1>
+      </div>
+      <div class="topbar-actions">
+        <a href="{% url 'expenses:list' %}" class="btn btn-ghost btn-sm"
+          ><i class="fas fa-arrow-left"></i> Back</a
+        >
+      </div>
+    </div>
+
+    <div class="card" style="max-width: 700px">
+      <div style="text-align: center; margin-bottom: 32px">
+        <div
+          class="stat-icon {% if expense.transaction_type == 'expense' %}expense{% else %}income{% endif %}"
+          style="
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 16px;
+            font-size: 1.5rem;
+          "
+        >
+          <i
+            class="fas fa-{% if expense.transaction_type == 'expense' %}arrow-down{% else %}arrow-up{% endif %}"
+          ></i>
         </div>
+        <h2
+          class="{% if expense.transaction_type == 'expense' %}amount-expense{% else %}amount-income{% endif %}"
+        >
+          {% if expense.transaction_type == 'expense' %}-{% else %}+{% endif  %}{{ expense.amount|floatformat:2 }} {{ currency }}
+        </h2>
+        <p style="color: var(--gray-500)">
+          {{ expense.description|default:"Transaction" }}
+        </p>
+      </div>
 
-        <div class="card" style="max-width:700px;">
-            <div style="text-align:center; margin-bottom:32px;">
-                <div class="stat-icon {% if expense.transaction_type == 'expense' %}expense{% else %}income{% endif %}" style="width:64px; height:64px; margin:0 auto 16px; font-size:1.5rem;">
-                    <i class="fas fa-{% if expense.transaction_type == 'expense' %}arrow-down{% else %}arrow-up{% endif %}"></i>
-                </div>
-                <h2 class="{% if expense.transaction_type == 'expense' %}amount-expense{% else %}amount-income{% endif %}">
-                    {% if expense.transaction_type == 'expense' %}-{% else %}+{% endif %}{{ expense.amount|floatformat:2 }} {{ currency }}
-                </h2>
-                <p style="color:var(--gray-500);">{{ expense.description|default:"Transaction" }}</p>
-            </div>
-
-            <div class="detail-grid">
-                <div class="detail-item">
-                    <div class="label">Date</div>
-                    <div class="value">{{ expense.date|date:"d F Y" }}</div>
-                </div>
-                <div class="detail-item">
-                    <div class="label">Category</div>
-                    <div class="value">
-                        {% if expense.category %}
-                        <span class="cat-dot" style="background:{{ expense.category.color }};"></span>{{ expense.category.name }}
-                        {% else %}—{% endif %}
-                    </div>
-                </div>
-                <div class="detail-item">
-                    <div class="label">Transaction Type</div>
-                    <div class="value"><span class="badge badge-{{ expense.transaction_type }}">{{ expense.get_transaction_type_display }}</span></div>
-                </div>
-                <div class="detail-item">
-                    <div class="label">Payment Method</div>
-                    <div class="value">{{ expense.get_payment_method_display }}</div>
-                </div>
-                <div class="detail-item">
-                    <div class="label">Source</div>
-                    <div class="value">{{ expense.get_source_display }}</div>
-                </div>
-                <div class="detail-item">
-                    <div class="label">Status</div>
-                    <div class="value"><span class="badge badge-source">{{ expense.get_status_display }}</span></div>
-                </div>
-                {% if expense.merchant_name %}
-                <div class="detail-item">
-                    <div class="label">Merchant</div>
-                    <div class="value">{{ expense.merchant_name }}</div>
-                </div>
-                {% endif %}
-                {% if expense.location %}
-                <div class="detail-item">
-                    <div class="label">Location</div>
-                    <div class="value">{{ expense.location }}</div>
-                </div>
-                {% endif %}
-                <div class="detail-item">
-                    <div class="label">Created</div>
-                    <div class="value">{{ expense.created_at|date:"d M Y, H:i" }}</div>
-                </div>
-                <div class="detail-item">
-                    <div class="label">Last Updated</div>
-                    <div class="value">{{ expense.updated_at|date:"d M Y, H:i" }}</div>
-                </div>
-            </div>
-
-            {% if expense.notes %}
-            <div class="detail-item" style="margin-bottom:24px;">
-                <div class="label">Notes</div>
-                <div class="value" style="font-weight:400;">{{ expense.notes }}</div>
-            </div>
-            {% endif %}
-
-            {% if expense.attachment %}
-            <div style="margin-bottom:24px;">
-                <h4 style="margin-bottom:12px;">Receipt / Attachment</h4>
-                <a href="{{ expense.attachment.url }}" target="_blank" class="btn btn-secondary btn-sm">
-                    <i class="fas fa-paperclip"></i> View Attachment
-                </a>
-            </div>
-            {% endif %}
-
-            <div style="display:flex; gap:12px;">
-                <a href="{% url 'expenses:edit' expense.id %}" class="btn btn-primary"><span class="btn-text">Edit</span></a>
-                <a href="{% url 'expenses:delete' expense.id %}" class="btn btn-danger"><span class="btn-text">Delete</span></a>
-            </div>
+      <div class="detail-grid">
+        <div class="detail-item">
+          <div class="label">Date</div>
+          <div class="value">{{ expense.date|date:"d F Y" }}</div>
         </div>
-    </main>
+        <div class="detail-item">
+          <div class="label">Wallet</div>
+          <div class="value">
+            {% if expense.wallet %}{{ expense.wallet.name }}{% else %}—{% endif  %}
+          </div>
+        </div>
+        <div class="detail-item">
+          <div class="label">Category</div>
+          <div class="value">
+            {% if expense.category %}
+            <span
+              class="cat-dot"
+              style="background:{{ expense.category.color }};"
+            ></span
+            >{{ expense.category.name }} {% else %}—{% endif %}
+          </div>
+        </div>
+        <div class="detail-item">
+          <div class="label">Transaction Type</div>
+          <div class="value">
+            <span class="badge badge-{{ expense.transaction_type }}"
+              >{{ expense.get_transaction_type_display }}</span
+            >
+          </div>
+        </div>
+        <div class="detail-item">
+          <div class="label">Payment Method</div>
+          <div class="value">{{ expense.get_payment_method_display }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="label">Source</div>
+          <div class="value">{{ expense.get_source_display }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="label">Status</div>
+          <div class="value">
+            <span class="badge badge-source"
+              >{{ expense.get_status_display }}</span
+            >
+          </div>
+        </div>
+        {% if expense.merchant_name %}
+        <div class="detail-item">
+          <div class="label">Merchant</div>
+          <div class="value">{{ expense.merchant_name }}</div>
+        </div>
+        {% endif %} {% if expense.location %}
+        <div class="detail-item">
+          <div class="label">Location</div>
+          <div class="value">{{ expense.location }}</div>
+        </div>
+        {% endif %}
+        <div class="detail-item">
+          <div class="label">Created</div>
+          <div class="value">{{ expense.created_at|date:"d M Y, H:i" }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="label">Last Updated</div>
+          <div class="value">{{ expense.updated_at|date:"d M Y, H:i" }}</div>
+        </div>
+      </div>
+
+      {% if expense.notes %}
+      <div class="detail-item" style="margin-bottom: 24px">
+        <div class="label">Notes</div>
+        <div class="value" style="font-weight: 400">{{ expense.notes }}</div>
+      </div>
+      {% endif %} {% if expense.attachment %}
+      <div style="margin-bottom: 24px">
+        <h4 style="margin-bottom: 12px">Receipt / Attachment</h4>
+        <a
+          href="{{ expense.attachment.url }}"
+          target="_blank"
+          class="btn btn-secondary btn-sm"
+        >
+          <i class="fas fa-paperclip"></i> View Attachment
+        </a>
+      </div>
+      {% endif %}
+
+      <div style="display: flex; gap: 12px">
+        <a href="{% url 'expenses:edit' expense.id %}" class="btn btn-primary"
+          ><span class="btn-text">Edit</span></a
+        >
+        <a href="{% url 'expenses:delete' expense.id %}" class="btn btn-danger"
+          ><span class="btn-text">Delete</span></a
+        >
+      </div>
+    </div>
+  </main>
 </div>
 
-{% include "partials/bottom_nav.html" with active="expenses" %}
-{% endblock %}
+{% include "partials/bottom_nav.html" with active="expenses" %} {% endblock %}

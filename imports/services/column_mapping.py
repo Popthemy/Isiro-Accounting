@@ -28,7 +28,7 @@ DESCRIPTION_FIELDS = [
 AMOUNT_FIELDS = [
     "amount", "transactionamount", "debit", "credit",
     "value", "transactionvalue", "amountusd", "amountlocal",
-    "withdrawal", "deposit", "outgoing", "incoming", "moneyin", "moneyout", "paidin", "paidout",
+    "withdrawal", "deposit", "outgoing", "incoming", "moneyin", "moneyinngn", "moneyout",  "moneyoutngn", "paidin", "paidout",
 ]
 
 BALANCE_FIELDS = [
@@ -38,8 +38,10 @@ BALANCE_FIELDS = [
 ]
 
 # Fields that, when present, indicate a debit vs credit.
-DEBIT_FIELDS = ["debit", "withdrawal", "outgoing", "paidout", "moneyout"]
-CREDIT_FIELDS = ["credit", "deposit", "incoming", "paidin", "moneyin"]
+DEBIT_FIELDS = ["debit", "withdrawal",
+                "outgoing", "paidout", "moneyout", "moneyoutngn",]
+CREDIT_FIELDS = ["credit", "deposit",
+                 "incoming", "paidin", "moneyinngn", "moneyin"]
 
 # Header
 ALL_HEADER_FIELDS = (

@@ -1,0 +1,129 @@
+{% extends "base.html" %} 
+
+{% load static %}
+ 
+{% block title %}Wallet Details—Isiro{% endblock %} 
+ 
+{% block body_class %}app-page{% endblock %} 
+ 
+{% block content %}
+<div class="app-layout">
+  {% include "partials/sidebar.html" with active="wallets" %}
+
+  <main class="main-content">
+    <div class="topbar">
+      <div style="display: flex; align-items: center; gap: 16px">
+        <button class="menu-toggle"><i class="fas fa-bars"></i></button>
+        <h1>{{ wallet.name }}</h1>
+      </div>
+      <div class="topbar-actions">
+        <a
+          href="{% url 'expenses:wallet_edit' wallet.id %}"
+          class="btn btn-ghost btn-sm"
+          ><i class="fas fa-pen"></i> Edit</a
+        >
+      </div>
+    </div>
+
+    <div class="card" style="max-width: 900px">
+      <div class="detail-grid">
+        <div class="detail-item">
+          <div class="label">Name</div>
+          <div class="value">{{ wallet.name }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="label">Type</div>
+          <div class="value">{{ wallet.get_account_type_display }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="label">Opening Balance</div>
+          <div class="value">
+            {{ wallet.opening_balance|floatformat:2 }} {{ wallet.currency }}
+          </div>
+        </div>
+        <div class="detail-item">
+          <div class="label">Current Balance</div>
+          <div class="value">
+            {{ wallet.current_balance|floatformat:2 }} {{ wallet.currency }}
+          </div>
+        </div>
+        <div class="detail-item">
+          <div class="label">Currency</div>
+          <div class="value">{{ wallet.currency }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="label">Status</div>
+          <div class="value">
+            <span class="badge badge-source"
+              >{% if wallet.is_active %}Active{% else %}Inactive{% endif %}
+              </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-grid" style="margin-top: 24px">
+        <div class="chart-card">
+          <h3>Wallet Summary</h3>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <div class="label">Total Income</div>
+              <div class="value">
+                {{ total_income|floatformat:2 }} {{ currency }}
+              </div>
+            </div>
+            <div class="detail-item">
+              <div class="label">Total Expenses</div>
+              <div class="value">
+                {{ total_expenses|floatformat:2 }} {{ currency }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="txn-section">
+        <h3></h3>
+        {% if recent_transactions %}
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Type</th>
+                <th>Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for tx in recent_transactions %}
+              <tr>
+                <td>{{ tx.date|date:"d M Y" }}</td>
+                <td>{{ tx.description|default:"—" }}</td>
+                <td>
+                  <span class="badge badge-{{ tx.transaction_type }}"
+                    >{{ tx.get_transaction_type_display }}</span
+                  >
+                </td>
+                <td
+                  class="{% if tx.transaction_type == 'expense' %}amount-expense{% else %}amount-income{% endif %}"
+                >
+                  {% if tx.transaction_type == 'expense' %}-{% endif %}{{
+                  tx.amount|floatformat:2 }}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+          <i class="fas fa-inbox"></i>
+          <h3>No transactions yet</h3>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </main>
+</div>
+
+{% include "partials/bottom_nav.html" with active="wallets" %} {% endblock %}

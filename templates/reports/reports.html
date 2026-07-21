@@ -47,6 +47,12 @@
             <button type="submit" name="period" value="month" class="filter-btn {% if period == 'month' %}active{% endif %}">This Month</button>
             <button type="submit" name="period" value="30" class="filter-btn {% if period == '30' %}active{% endif %}">Last 30 Days</button>
             <button type="submit" name="period" value="custom" class="filter-btn {% if period == 'custom' %}active{% endif %}">Custom Range</button>
+            <select name="wallet" class="form-input">
+                <option value="">All Wallets</option>
+                {% for w in wallets %}
+                <option value="{{ w.id }}" {% if selected_wallet|add:"0" == w.id %}selected{% endif %}>{{ w.name }}</option>
+                {% endfor %}
+            </select>
             {% if period == 'custom' %}
                 <input type="date" name="start" class="form-input" value="{{ start|date:'Y-m-d' }}">
                 <input type="date" name="end" class="form-input" value="{{ end|date:'Y-m-d' }}">

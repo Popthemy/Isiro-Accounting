@@ -1,29 +1,78 @@
 <!-- Shared sidebar partial — include with active='dashboard' -->
 {% load static %}
 <aside class="sidebar">
-    <div class="sidebar-header">
-        <a href="{% url 'landing' %}" class="logo"><i class="fas fa-wallet"></i> Isiro</a>
-    </div>
-    <nav class="sidebar-nav">
-        <a href="{% url 'dashboard' %}" class="nav-item {% if active == 'dashboard' %}active{% endif %}"><i class="fas fa-gauge-high"></i> Dashboard</a>
-        <a href="{% url 'expenses:list' %}" class="nav-item {% if active == 'expenses' %}active{% endif %}"><i class="fas fa-receipt"></i> Expenses</a>
-        <a href="{% url 'income:income_list' %}" class="nav-item {% if active == 'income' %}active{% endif %}"><i class="fas fa-arrow-trend-up"></i> Income</a>
-        <a href="{% url 'imports:upload' %}" class="nav-item {% if active == 'imports' %}active{% endif %}"><i class="fas fa-file-import"></i> Import Statement</a>
-        <a href="{% url 'budgets:list' %}" class="nav-item {% if active == 'budgets' %}active{% endif %}"><i class="fas fa-piggy-bank"></i> Budgets</a>
-        <a href="{% url 'expenses:categories' %}" class="nav-item {% if active == 'categories' %}active{% endif %}"><i class="fas fa-tags"></i> Categories</a>
-        <a href="{% url 'expenses:reports' %}" class="nav-item {% if active == 'reports' %}active{% endif %}"><i class="fas fa-chart-line"></i> Reports</a>
-        <a href="{% url 'notifications:list' %}" class="nav-item {% if active == 'notifications' %}active{% endif %}">
-            <i class="fas fa-bell"></i> Notifications
-            {% if unread_count %}<span class="badge badge-expense" style="margin-left:auto;">{{ unread_count }}</span>{% endif %}
-        </a>
-        <a href="{% url 'users:profile' %}" class="nav-item {% if active == 'profile' %}active{% endif %}"><i class="fas fa-user"></i> Profile</a>
-    </nav>
-    <div class="sidebar-footer">
-        <form method="post" action="{% url 'users:logout' %}">
-            {% csrf_token %}
-            <button type="submit" class="nav-item" style="width:100%; border:none; background:none; text-align:left;">
-                <i class="fas fa-right-from-bracket"></i> Logout
-            </button>
-        </form>
-    </div>
+  <div class="sidebar-header">
+    <a href="{% url 'landing' %}" class="logo"
+      ><i class="fas fa-wallet"></i> Isiro</a
+    >
+  </div>
+  <nav class="sidebar-nav">
+    <a
+      href="{% url 'dashboard' %}"
+      class="nav-item {% if active == 'dashboard' %}active{% endif %}"
+      ><i class="fas fa-gauge-high"></i> Dashboard</a
+    >
+    <a
+      href="{% url 'expenses:list' %}"
+      class="nav-item {% if active == 'expenses' %}active{% endif %}"
+      ><i class="fas fa-receipt"></i> Expenses</a
+    >
+    <a
+      href="{% url 'income:income_list' %}"
+      class="nav-item {% if active == 'income' %}active{% endif %}"
+      ><i class="fas fa-arrow-trend-up"></i> Income</a
+    >
+    <a
+      href="{% url 'expenses:wallet_list' %}"
+      class="nav-item {% if active == 'wallets' %}active{% endif %}"
+      ><i class="fas fa-wallet"></i> Wallets</a
+    >
+    <a
+      href="{% url 'imports:upload' %}"
+      class="nav-item {% if active == 'imports' %}active{% endif %}"
+      ><i class="fas fa-file-import"></i> Import Statement</a
+    >
+    <a
+      href="{% url 'budgets:list' %}"
+      class="nav-item {% if active == 'budgets' %}active{% endif %}"
+      ><i class="fas fa-piggy-bank"></i> Budgets</a
+    >
+    <a
+      href="{% url 'expenses:categories' %}"
+      class="nav-item {% if active == 'categories' %}active{% endif %}"
+      ><i class="fas fa-tags"></i> Categories</a
+    >
+    <a
+      href="{% url 'expenses:reports' %}"
+      class="nav-item {% if active == 'reports' %}active{% endif %}"
+      ><i class="fas fa-chart-line"></i> Reports</a
+    >
+    <a
+      href="{% url 'notifications:list' %}"
+      class="nav-item {% if active == 'notifications' %}active{% endif %}"
+    >
+      <i class="fas fa-bell"></i> Notifications {% if unread_count %}<span
+        class="badge badge-expense"
+        style="margin-left: auto"
+        >{{ unread_count }}</span
+      >{% endif %}
+    </a>
+    <a
+      href="{% url 'users:profile' %}"
+      class="nav-item {% if active == 'profile' %}active{% endif %}"
+      ><i class="fas fa-user"></i> Profile</a
+    >
+  </nav>
+  <div class="sidebar-footer">
+    <form method="post" action="{% url 'users:logout' %}">
+      {% csrf_token %}
+      <button
+        type="submit"
+        class="nav-item"
+        style="width: 100%; border: none; background: none; text-align: left"
+      >
+        <i class="fas fa-right-from-bracket"></i> Logout
+      </button>
+    </form>
+  </div>
 </aside>

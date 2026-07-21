@@ -33,7 +33,10 @@ class Budget(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ["-created_at"]
+        ordering = ["-created_at"]          # Newest budgets first
+        verbose_name = "Budget"
+        verbose_name_plural = "Budgets"
+        unique_together = ["user", "category", "start_date"]
 
     def __str__(self) -> str:
         return f"{self.name} — {self.category.name}"

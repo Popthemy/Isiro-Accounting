@@ -45,6 +45,12 @@
                 <option value="{{ c.id }}" {% if request.GET.category|add:"0" == c.id %}selected{% endif %}>{{ c.name }}</option>
                 {% endfor %}
             </select>
+            <select name="wallet" class="form-input">
+                <option value="">All Wallets</option>
+                {% for w in wallets %}
+                <option value="{{ w.id }}" {% if request.GET.wallet|add:"0" == w.id %}selected{% endif %}>{{ w.name }}</option>
+                {% endfor %}
+            </select>
             <input type="date" name="date_from" class="form-input" value="{{ request.GET.date_from }}" title="From date">
             <input type="date" name="date_to" class="form-input" value="{{ request.GET.date_to }}" title="To date">
             <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-filter"></i> Filter</button>
@@ -57,26 +63,27 @@
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th>Date</th><th>Category</th><th>Description</th><th>Source</th>
+                            <th>Date</th><th>Wallet</th><th>Category</th><th>Description</th><th>Source</th>
                             <th>Amount</th><th>Type</th><th>Status</th><th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for t in expenses %}
-                        <tr>
-                            <td>{{ t.date|date:"d M Y" }}</td>
-                            <td>{% if t.category %}<span class="cat-dot" style="background:{{ t.category.color }};"></span>{{ t.category.name }}{% else %}<span class="cat-dot" style="background:#D1D5DB;"></span>—{% endif %}</td>
-                            <td><a href="{% url 'expenses:detail' t.id %}" style="color:inherit;">{{ t.description|default:"—" }}</a></td>
-                            <td><span class="badge badge-source">{{ t.get_source_display }}</span></td>
-                            <td class="{% if t.transaction_type == 'expense' %}amount-expense{% else %}amount-income{% endif %}">{% if t.transaction_type == 'expense' %}-{% endif %}{{ t.amount|floatformat:2 }}</td>
-                            <td><span class="badge badge-{{ t.transaction_type }}"><i class="fas fa-{% if t.transaction_type == 'expense' %}minus{% else %}plus{% endif %}"></i> {{ t.transaction_type|title }}</span></td>
-                            <td><span class="badge badge-source">{{ t.get_status_display }}</span></td>
-                            <td>
-                                <a href="{% url 'expenses:detail' t.id %}" class="btn btn-ghost btn-sm" title="View"><i class="fas fa-eye"></i></a>
-                                <a href="{% url 'expenses:edit' t.id %}" class="btn btn-ghost btn-sm" title="Edit"><i class="fas fa-pen"></i></a>
-                                <a href="{% url 'expenses:delete' t.id %}" class="btn btn-ghost btn-sm" title="Delete" style="color:var(--danger-500);"><i class="fas fa-trash"></i></a>
-                            </td>
-                        </tr>
+                            <tr>
+                                <td>{{ t.date|date:"d M Y" }}</td>
+                                <td>{% if t.wallet %}<span class="badge badge-source">{{ t.wallet.name }}</span>{% else %}—{% endif %}</td>
+                                <td>{% if t.category %}<span class="cat-dot" style="background:{{ t.category.color }};"></span>{{ t.category.name }}{% else %}<span class="cat-dot" style="background:#D1D5DB;"></span>—{% endif %}</td>
+                                <td><a href="{% url 'expenses:detail' t.id %}" style="color:inherit;">{{ t.description|default:"—" }}</a></td>
+                                <td><span class="badge badge-source">{{ t.get_source_display }}</span></td>
+                                <td class="{% if t.transaction_type == 'expense' %}amount-expense{% else %}amount-income{% endif %}">{% if t.transaction_type == 'expense' %}-{% endif %}{{ t.amount|floatformat:2 }}</td>
+                                <td><span class="badge badge-{{ t.transaction_type }}"><i class="fas fa-{% if t.transaction_type == 'expense' %}minus{% else %}plus{% endif %}"></i> {{ t.transaction_type|title }}</span></td>
+                                <td><span class="badge badge-source">{{ t.get_status_display }}</span></td>
+                                <td>
+                                    <a href="{% url 'expenses:detail' t.id %}" class="btn btn-ghost btn-sm" title="View"><i class="fas fa-eye"></i></a>
+                                    <a href="{% url 'expenses:edit' t.id %}" class="btn btn-ghost btn-sm" title="Edit"><i class="fas fa-pen"></i></a>
+                                    <a href="{% url 'expenses:delete' t.id %}" class="btn btn-ghost btn-sm" title="Delete" style="color:var(--danger-500);"><i class="fas fa-trash"></i></a>
+                                </td>
+                            </tr>
                         {% endfor %}
                     </tbody>
                 </table>

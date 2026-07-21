@@ -1,90 +1,144 @@
-{% extends "base.html" %}
-{% load static %}
+{% extends "base.html" %} 
 
-{% block title %}Preview Import — Isiro{% endblock %}
+{% load static %} 
+
+{% block title %}Preview Import —Isiro{% endblock %}
 
 {% block body_class %}app-page{% endblock %}
 
 {% block content %}
 <div class="app-layout">
-    {% include "partials/sidebar.html" with active="imports" %}
+  {% include "partials/sidebar.html" with active="imports" %}
 
-    <main class="main-content">
-        <div class="topbar">
-            <div style="display:flex; align-items:center; gap:16px;">
-                <button class="menu-toggle"><i class="fas fa-bars"></i></button>
-                <h1>Review Imported Transactions</h1>
-            </div>
+  <main class="main-content">
+    <div class="topbar">
+      <div style="display: flex; align-items: center; gap: 16px">
+        <button class="menu-toggle"><i class="fas fa-bars"></i></button>
+        <h1>Review Imported Transactions</h1>
+      </div>
+    </div>
+
+    <div class="alert alert-info">
+      <i class="fas fa-circle-check"></i>
+      <div>
+        <strong>{{ rows|length }} transactions detected</strong> from "{{ file_name }}". Review, edit categories, and remove unwanted rows before
+        confirming.
+      </div>
+    </div>
+
+    <form method="post" action="{% url 'imports:confirm' %}">
+      {% csrf_token %}
+      <div class="txn-section">
+        <div class="table-wrap">
+          <table class="data-table preview-table">
+            <thead>
+              <tr>
+                <th><input type="checkbox" id="select-all" checked /></th>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Amount</th>
+                <th>Wallet</th>
+                <th>Category</th>
+                <th>Type</th>
+                <th>Remove</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in rows %}
+              <tr>
+                <td>
+                  <input
+                    type="checkbox"
+                    name="row_index"
+                    value="{{ forloop.counter0 }}"
+                    checked
+                  />
+                </td>
+                <td>{{ row.date }}</td>
+                <td>{{ row.description|default:"—" }}</td>
+                <td
+                  class="{% if row.transaction_type == 'expense' %}amount-expense{% else %}amount-income{% endif %}"
+                >
+                  {{ row.amount }}
+                </td>
+                <td>
+                  <select name="wallet_{{ forloop.counter0 }}">
+                    <option value="">— Select Wallet —</option>
+                    {% for wallet in wallets %}
+                    <option value="{{ wallet.id }}">{{ wallet.name }}</option>
+                    {% endfor %}
+                  </select>
+                </td>
+                <td>
+                  <select name="category_{{ forloop.counter0 }}">
+                    <option value="">— None —</option>
+                    {% for c in categories %}
+                    <option value="{{ c.id }}">{{ c.name }}</option>
+                    {% endfor %}
+                  </select>
+                </td>
+                <td>
+                  <select name="type_{{ forloop.counter0 }}">
+                     <option
+                      value="income"
+                      {%
+                      if
+                      row.transaction_type=""
+                      ="expense"
+                      %}selected{%
+                      endif
+                      %}
+                    >
+                      Expense
+                    </option>
+                    <option
+                      value="income"
+                      {%
+                      if
+                      row.transaction_type=""
+                      ="income"
+                      %}selected{%
+                      endif
+                      %}
+                    >
+                      Income
+                    </option>
+                  </select>
+                </td>
+                <td>
+                  <i
+                    class="fas fa-times row-remove"
+                    style="color: var(--danger-500); cursor: pointer"
+                  ></i>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
         </div>
-
-        <div class="alert alert-info">
-            <i class="fas fa-circle-check"></i>
-            <div>
-                <strong>{{ rows|length }} transactions detected</strong> from "{{ file_name }}".
-                Review, edit categories, and remove unwanted rows before confirming.
-            </div>
+        <div style="display: flex; gap: 12px; margin-top: 24px">
+          <button type="submit" class="btn btn-primary btn-lg">
+            <span class="spinner"></span>
+            <span class="btn-text"
+              >Confirm & Import {{ rows|length }} Transactions</span
+            >
+          </button>
+          <a href="{% url 'imports:upload' %}" class="btn btn-ghost btn-lg"
+            ><span class="btn-text">Cancel</span></a
+          >
         </div>
-
-        <form method="post" action="{% url 'imports:confirm' %}">
-            {% csrf_token %}
-            <div class="txn-section">
-                <div class="table-wrap">
-                    <table class="data-table preview-table">
-                        <thead>
-                            <tr>
-                                <th><input type="checkbox" id="select-all" checked></th>
-                                <th>Date</th>
-                                <th>Description</th>
-                                <th>Amount</th>
-                                <th>Category</th>
-                                <th>Type</th>
-                                <th>Remove</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for row in rows %}
-                            <tr>
-                                <td><input type="checkbox" name="row_index" value="{{ forloop.counter0 }}" checked></td>
-                                <td>{{ row.date }}</td>
-                                <td>{{ row.description|default:"—" }}</td>
-                                <td class="{% if row.transaction_type == 'expense' %}amount-expense{% else %}amount-income{% endif %}">{{ row.amount }}</td>
-                                <td>
-                                    <select name="category_{{ forloop.counter0 }}">
-                                        <option value="">— None —</option>
-                                        {% for c in categories %}
-                                        <option value="{{ c.id }}">{{ c.name }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </td>
-                                <td>
-                                    <select name="type_{{ forloop.counter0 }}">
-                                        <option value="expense" {% if row.transaction_type == 'expense' %}selected{% endif %}>Expense</option>
-                                        <option value="income" {% if row.transaction_type == 'income' %}selected{% endif %}>Income</option>
-                                    </select>
-                                </td>
-                                <td><i class="fas fa-times row-remove" style="color:var(--danger-500); cursor:pointer;"></i></td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                <div style="display:flex; gap:12px; margin-top:24px;">
-                    <button type="submit" class="btn btn-primary btn-lg">
-                        <span class="spinner"></span>
-                        <span class="btn-text">Confirm & Import {{ rows|length }} Transactions</span>
-                    </button>
-                    <a href="{% url 'imports:upload' %}" class="btn btn-ghost btn-lg"><span class="btn-text">Cancel</span></a>
-                </div>
-            </div>
-        </form>
-    </main>
+      </div>
+    </form>
+  </main>
 </div>
 
 {% include "partials/bottom_nav.html" with active="imports" %}
 
 <script>
-document.getElementById('select-all').addEventListener('change', function() {
-    document.querySelectorAll('input[name="row_index"]').forEach(cb => cb.checked = this.checked);
-});
+  document.getElementById("select-all").addEventListener("change", function () {
+    document
+      .querySelectorAll('input[name="row_index"]')
+      .forEach((cb) => (cb.checked = this.checked));
+  });
 </script>
 {% endblock %}

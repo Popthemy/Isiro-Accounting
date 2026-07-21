@@ -9,7 +9,7 @@ from django.shortcuts import redirect, render
 from django.views import View
 
 from core.models import log_activity, get_client_ip
-from expenses.models import Category, Expense
+from expenses.models import Category, Expense, Wallet
 from notifications.models import create_notification
 
 from .forms import UploadForm
@@ -41,11 +41,13 @@ class ImportUploadView(LoginRequiredMixin, View):
             rows = parse_pdf_file(upload)
             file_type = "pdf"
         else:
-            messages.error(request, "Unsupported file type. Please upload a PDF or CSV.")
+            messages.error(
+                request, "Unsupported file type. Please upload a PDF or CSV.")
             return render(request, self.template_name, {"form": UploadForm()})
 
         if not rows:
-            messages.warning(request, "No transactions could be extracted from this file. Try a different file or add transactions manually.")
+            messages.warning(
+                request, "No transactions could be extracted from this file. Try a different file or add transactions manually.")
             return render(request, self.template_name, {"form": UploadForm()})
 
         imported_file = ImportedFile.objects.create(
@@ -58,13 +60,18 @@ class ImportUploadView(LoginRequiredMixin, View):
         request.session["import_file_type"] = file_type
         request.session["import_file_id"] = imported_file.id
 
-        print(f"Uploaded file: {upload.name}, type: {file_type}, rows extracted: {len(rows)}")  # Debugging line
+        # Debugging line
+        print(
+            f"Uploaded file: {upload.name}, type: {file_type}, rows extracted: {len(rows)}")
 
         log_activity(request.user, "upload_import", "imports",
-                      f"Uploaded {upload.name} ({len(rows)} rows)", ip_address=get_client_ip(request))
+                     f"Uploaded {upload.name} ({len(rows)} rows)", ip_address=get_client_ip(request))
 
-        categories = list(Category.objects.filter(user=request.user).values("id", "name"))
-        return render(request, "imports/import_preview.html", {"rows": rows, "categories": categories, "file_name": upload.name})
+        categories = list(Category.objects.filter(
+            user=request.user).values("id", "name"))
+        wallets = list(Wallet.objects.filter(
+            user=request.user, is_active=True).values("id", "name"))
+        return render(request, "imports/import_preview.html", {"rows": rows, "categories": categories, "wallets": wallets, "file_name": upload.name})
 
 
 class ImportConfirmView(LoginRequiredMixin, View):
@@ -77,14 +84,18 @@ class ImportConfirmView(LoginRequiredMixin, View):
 
         confirmed_rows = []
         indices = request.POST.getlist("row_index")
-        print(f"Received indices for confirmation: {indices}, raw rows: {raw_rows}")  # Debugging line
+        # Debugging line
+        print(
+            f"Received indices for confirmation: {indices}, raw rows: {raw_rows}")
         for idx_str in indices:
             idx = int(idx_str)
             if idx >= len(raw_rows):
                 continue
             row = raw_rows[idx]
             row["category"] = request.POST.get(f"category_{idx}", "")
-            row["transaction_type"] = request.POST.get(f"type_{idx}", row["transaction_type"])
+            row["wallet"] = request.POST.get(f"wallet_{idx}", "")
+            row["transaction_type"] = request.POST.get(
+                f"type_{idx}", row["transaction_type"])
             confirmed_rows.append(row)
 
         if not confirmed_rows:
@@ -101,13 +112,16 @@ class ImportConfirmView(LoginRequiredMixin, View):
             if amount <= 0:
                 continue
             try:
-                date_obj = datetime.strptime(str(row["date"])[:10], "%Y-%m-%d").date()
+                date_obj = datetime.strptime(
+                    str(row["date"])[:10], "%Y-%m-%d").date()
             except ValueError:
                 try:
-                    date_obj = datetime.strptime(str(row["date"])[:10], "%d/%m/%Y").date()
+                    date_obj = datetime.strptime(
+                        str(row["date"])[:10], "%d/%m/%Y").date()
                 except ValueError:
                     try:
-                        date_obj = datetime.strptime(str(row["date"])[:10], "%m/%d/%Y").date()
+                        date_obj = datetime.strptime(
+                            str(row["date"])[:10], "%m/%d/%Y").date()
                     except ValueError:
                         continue
 
@@ -116,14 +130,29 @@ class ImportConfirmView(LoginRequiredMixin, View):
             if cat_id:
                 if cat_id not in category_cache:
                     try:
-                        category_cache[cat_id] = Category.objects.get(id=cat_id, user=request.user)
+                        category_cache[cat_id] = Category.objects.get(
+                            id=cat_id, user=request.user)
                     except Category.DoesNotExist:
                         category_cache[cat_id] = None
                 cat = category_cache[cat_id]
 
-            source = "csv" if request.session.get("import_file_type") == "csv" else "pdf"
+            wallet_id = row.get("wallet")
+            wallet = None
+            if wallet_id:
+                wallet = Wallet.objects.filter(
+                    id=wallet_id, user=request.user, is_active=True).first()
+            if not wallet:
+                wallet = Wallet.objects.filter(
+                    user=request.user, is_active=True).order_by("id").first()
+                if not wallet:
+                    messages.error(
+                        request, "Please create at least one wallet before importing transactions.")
+                    return redirect("expenses:wallet_add")
+
+            source = "csv" if request.session.get(
+                "import_file_type") == "csv" else "pdf"
             expenses_to_create.append(Expense(
-                user=request.user, amount=amount, date=date_obj, category=cat,
+                user=request.user, wallet=wallet, amount=amount, date=date_obj, category=cat,
                 description=row.get("description", "")[:200],
                 transaction_type=row.get("transaction_type", "expense"), source=source,
             ))
@@ -132,18 +161,20 @@ class ImportConfirmView(LoginRequiredMixin, View):
 
         file_id = request.session.get("import_file_id")
         if file_id:
-            ImportedFile.objects.filter(id=file_id).update(row_count=len(created), status="completed")
+            ImportedFile.objects.filter(id=file_id).update(
+                row_count=len(created), status="completed")
 
         create_notification(request.user, "Import Complete",
                             f"Successfully imported {len(created)} transactions from {request.session.get('import_file_name', 'your file')}.", "import")
 
         log_activity(request.user, "confirm_import", "imports",
-                      f"Imported {len(created)} transactions", ip_address=get_client_ip(request))
+                     f"Imported {len(created)} transactions", ip_address=get_client_ip(request))
 
         for key in ("import_rows", "import_file_name", "import_file_type", "import_file_id"):
             request.session.pop(key, None)
 
-        messages.success(request, f"Successfully imported {len(created)} transactions!")
+        messages.success(
+            request, f"Successfully imported {len(created)} transactions!")
         return redirect("expenses:list")
 
 
@@ -152,5 +183,6 @@ class ImportHistoryView(LoginRequiredMixin, View):
     template_name = "imports/import_history.html"
 
     def get(self, request):
-        files = ImportedFile.objects.filter(user=request.user).order_by("-uploaded_at")
+        files = ImportedFile.objects.filter(
+            user=request.user).order_by("-uploaded_at")
         return render(request, self.template_name, {"files": files})

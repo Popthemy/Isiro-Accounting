@@ -1,5 +1,3 @@
-Here is a polished `README.md` suitable for a final-year project repository. It presents Isiro as a complete financial management system while keeping the technical details clear for reviewers.
-
 ```markdown
 # Isiro — Personal Finance Management & Statement Intelligence Platform
 
@@ -25,6 +23,20 @@ Record financial transactions manually with:
 - Descriptions
 - Payment methods
 - Income and expense classification
+
+### 💼 Wallets / Accounts with Opening Balances
+
+Track real account balances instead of calculating net worth only from income minus expenses.
+
+Users can now:
+
+- Create multiple wallets/accounts such as cash, bank, savings, or card accounts
+- Set an opening balance for each wallet
+- Assign transactions to the correct wallet/account
+- Maintain wallet-level balances automatically as transactions are added, edited, or deleted
+- View total financial position from wallet balances rather than a single inferred calculation
+
+This keeps the existing transaction model intact while adding a more realistic account-based balance system.
 
 ---
 
@@ -76,6 +88,9 @@ Understand financial behaviour through:
 - Category analysis
 - Monthly trends
 - Savings rate calculations
+- Wallet-based balance totals and per-account summaries
+
+The dashboard now reflects actual wallet account balances, making financial status reporting more accurate.
 
 ---
 
@@ -199,30 +214,30 @@ The system generates:
 ---
 
 # Project Architecture
-
 ```
 
 Isiro
 │
 ├── Authentication
-│   ├── User registration
-│   ├── Login
-│   └── Profile management
+│ ├── User registration
+│ ├── Login
+│ └── Profile management
 │
 ├── Transactions
-│   ├── Income tracking
-│   ├── Expense tracking
-│   └── Categories
+│ ├── Income tracking
+│ ├── Expense tracking
+│ ├── Categories
+
 │
 ├── Imports
-│   ├── PDF parser
-│   ├── CSV parser
-│   └── OCR extraction
+│ ├── PDF parser
+│ ├── CSV parser
+│ └── OCR extraction
 │
 ├── Analytics
-│   ├── Dashboard
-│   ├── Reports
-│   └── Spending insights
+│ ├── Dashboard
+│ ├── Reports
+│ └── Spending insights
 │
 └── Budget Management
 └── Category budgets
@@ -311,8 +326,18 @@ http://127.0.0.1:8000/
 
 Users can manually create:
 
-* Expenses
-* Income records
+- Expenses
+- Income records
+- Wallet-linked transactions with account-specific balances
+
+---
+
+### Manage expenses > Wallets / Accounts
+
+1. Navigate to **Wallets**
+2. Create a wallet/account with a name and opening balance
+3. Assign transactions to that wallet
+4. Review the wallet balance updates automatically as entries are created, edited, or removed
 
 ---
 
@@ -330,11 +355,12 @@ Users can manually create:
 
 Dashboard provides:
 
-* Current balance
-* Total income
-* Total expenses
-* Spending categories
-* Monthly trends
+- Current wallet/account balance
+- Total income
+- Total expenses
+- Spending categories
+- Monthly trends
+- Wallet summary insights
 
 ---
 
@@ -342,53 +368,13 @@ Dashboard provides:
 
 Potential enhancements:
 
-* Mobile application
-* AI-powered spending recommendations
-* Automatic bank API integration
-* Multi-currency exchange rates
-* Recurring transaction detection
-* Advanced financial forecasting
-* Machine learning transaction categorisation
-
----
-
-# Pricing Concept
-
-## Free
-
-$0/month
-
-Includes:
-
-* Manual tracking
-* Basic charts
-* Limited monthly transactions
-
----
-
-## Pro
-
-$9/month
-
-Includes:
-
-* Unlimited transactions
-* PDF/CSV imports
-* OCR extraction
-* Advanced reports
-
----
-
-## Business
-
-$29/month
-
-Includes:
-
-* Multi-user accounts
-* Team budgets
-* Priority support
-* API access
+- Mobile application
+- AI-powered spending recommendations
+- Automatic bank API integration
+- Multi-currency exchange rates
+- Recurring transaction detection
+- Advanced financial forecasting
+- Machine learning transaction categorisation
 
 ---
 
@@ -410,4 +396,3 @@ This project was developed for academic purposes.
 Built to simplify financial tracking and help users make smarter money decisions.
 
 ```
-
