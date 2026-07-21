@@ -85,6 +85,7 @@ ASGI_APPLICATION = "isiro.asgi.application"
 # ---------------------------------------------------------------------------
 DB_LIVE = os.getenv("DATABASE_URL", None)
 if DB_LIVE is not None:
+    print("DATABSE is postgres")
     DATABASES = {
     'default': dj_database_url.config(
         default= os.getenv("DATABASE_URL"),
@@ -95,6 +96,8 @@ if DB_LIVE is not None:
     )
 }
 else:
+    print("DATABSE is sqlites")
+
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
