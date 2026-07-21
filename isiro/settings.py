@@ -81,12 +81,14 @@ ASGI_APPLICATION = "isiro.asgi.application"
 DB_LIVE = os.getenv("DATABASE_URL", None)
 if DB_LIVE is not None:
     DATABASES = {
-        'default': dj_database_url.config(
-            default=os.getenv("DATABASE_URL"),
-            conn_max_age=600,
-            conn_health_checks=True,
-        )
-    }
+    'default': dj_database_url.config(
+        default= os.getenv("DATABASE_URL"),
+        conn_max_age=600,
+        conn_health_checks=True,
+        ssl_require=not os.getenv(
+            "DEBUG", "0") == "1"  # Force SSL in production,
+    )
+}
 else:
     DATABASES = {
         "default": {
