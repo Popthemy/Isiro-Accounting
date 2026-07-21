@@ -8,6 +8,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q, Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils import timezone
 from django.views import View
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
@@ -74,7 +75,7 @@ class WalletCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
     def get_success_url(self):
-        return "/wallets/"
+        return reverse("expenses:wallet_list")
 
 
 class WalletUpdateView(LoginRequiredMixin, UpdateView):
@@ -91,7 +92,7 @@ class WalletUpdateView(LoginRequiredMixin, UpdateView):
         return super().form_valid(form)
 
     def get_success_url(self):
-        return "/expenses/wallets/"
+        return reverse("expenses:wallet_list")
 
 
 class WalletDeleteView(LoginRequiredMixin, DeleteView):
@@ -104,7 +105,7 @@ class WalletDeleteView(LoginRequiredMixin, DeleteView):
 
     def get_success_url(self):
         messages.success(self.request, "Wallet deleted.")
-        return "/wallets/"
+        return reverse("expenses:wallet_list")
 
 
 class WalletDetailView(LoginRequiredMixin, DetailView):

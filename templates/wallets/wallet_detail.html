@@ -107,8 +107,7 @@
                 <td
                   class="{% if tx.transaction_type == 'expense' %}amount-expense{% else %}amount-income{% endif %}"
                 >
-                  {% if tx.transaction_type == 'expense' %}-{% endif %}{{
-                  tx.amount|floatformat:2 }}
+                  {% if tx.transaction_type == 'expense' %}-{% endif %}{{ tx.amount|floatformat:2 }}
                 </td>
               </tr>
               {% endfor %}
