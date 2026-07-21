@@ -8,6 +8,8 @@ for production deployment (a one-line change).
 
 from pathlib import Path
 import os
+import dj_database_url  # Make sure to: pip install dj-database-url psycopg2-binary
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -18,6 +20,7 @@ SECRET_KEY = os.environ.get(
     "DJANGO_SECRET_KEY",
     "django-insecure-isiro-development-key-change-in-production-7f3a9b2c1e",
 )
+
 DEBUG = os.environ.get("DJANGO_DEBUG", "True") == "True"
 ALLOWED_HOSTS = ["*", "localhost", "127.0.0.1", "0.0.0.0"]
 
@@ -42,6 +45,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -74,12 +78,22 @@ ASGI_APPLICATION = "isiro.asgi.application"
 # ---------------------------------------------------------------------------
 # Database  — SQLite for development; switch to PostgreSQL for production.
 # ---------------------------------------------------------------------------
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+DB_LIVE = os.getenv("DATABASE_URL", None)
+if DB_LIVE is not None:
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=os.getenv("DATABASE_URL"),
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
     }
-}
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
 
 # PostgreSQL configuration (uncomment for production):
 # DATABASES = {
@@ -124,6 +138,8 @@ USE_TZ = True
 STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
+
+STATICFILES_STORAGE =  "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"
