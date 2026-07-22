@@ -5,7 +5,7 @@ which matters for a final-year project defense.
 """
 
 from collections import OrderedDict
-from datetime import timedelta
+from datetime import date, timedelta
 
 from django.db.models import Sum
 from django.utils import timezone
@@ -25,11 +25,22 @@ def _month_range(months_ago: int = 0):
     return start, end
 
 
-def dashboard_stats(user):
+def _coerce_date(value):
+    if isinstance(value, date):
+        return value
+    if not value:
+        return None
+    return timezone.datetime.strptime(str(value), "%Y-%m-%d").date()
+
+
+def dashboard_stats(user, start_date=None, end_date=None):
     """Return the header-card figures for the dashboard."""
-    start, end = _month_range(0)
+    if start_date is None or end_date is None:
+        start, end = _month_range(0)
+        start_date = start.date()
+        end_date = end.date()
     qs = Expense.objects.filter(
-        user=user, date__gte=start.date(), date__lte=end.date())
+        user=user, date__gte=start_date, date__lte=end_date)
     expenses = qs.filter(transaction_type=Expense.TransactionType.EXPENSE).aggregate(
         t=Sum("amount"))["t"] or 0
     income = qs.filter(transaction_type=Expense.TransactionType.INCOME).aggregate(
@@ -55,13 +66,16 @@ def dashboard_stats(user):
     }
 
 
-def category_breakdown(user, months_ago: int = 0):
+def category_breakdown(user, months_ago: int = 0, start_date=None, end_date=None):
     """Return ``[(category_name, color, total), …]`` for the pie chart."""
-    start, end = _month_range(months_ago)
+    if start_date is None or end_date is None:
+        start, end = _month_range(months_ago)
+        start_date = start.date()
+        end_date = end.date()
     qs = (
         Expense.objects
         .filter(user=user, transaction_type=Expense.TransactionType.EXPENSE,
-                date__gte=start.date(), date__lte=end.date())
+                date__gte=start_date, date__lte=end_date)
         .values("category__name", "category__color")
         .annotate(total=Sum("amount"))
         .order_by("-total")
@@ -74,8 +88,27 @@ def category_breakdown(user, months_ago: int = 0):
     ]
 
 
-def monthly_spending(user, months: int = 6):
-    """Return ``OrderedDict`` of last N months: ``{'2024-01': 1234.5}``."""
+def monthly_spending(user, months: int = 6, start_date=None, end_date=None):
+    """Return an ``OrderedDict`` of monthly totals for the requested range."""
+    if start_date and end_date:
+        result = OrderedDict()
+        current = start_date.replace(day=1)
+        last = end_date.replace(day=1)
+        while current <= last:
+            label = current.strftime("%b %Y")
+            total = (
+                Expense.objects
+                .filter(user=user, transaction_type=Expense.TransactionType.EXPENSE,
+                        date__year=current.year, date__month=current.month)
+                .aggregate(t=Sum("amount"))["t"] or 0
+            )
+            result[label] = float(total)
+            if current.month == 12:
+                current = current.replace(year=current.year + 1, month=1)
+            else:
+                current = current.replace(month=current.month + 1)
+        return result
+
     now = timezone.now()
     result = OrderedDict()
     for i in range(months - 1, -1, -1):
@@ -91,8 +124,24 @@ def monthly_spending(user, months: int = 6):
     return result
 
 
-def weekly_expenses(user, weeks: int = 8):
-    """Return ``OrderedDict`` of last N weeks of expense totals."""
+def weekly_expenses(user, weeks: int = 8, start_date=None, end_date=None):
+    """Return an ``OrderedDict`` of weekly expense totals for the requested range."""
+    if start_date and end_date:
+        result = OrderedDict()
+        current_start = start_date
+        while current_start <= end_date:
+            current_end = min(current_start + timedelta(days=6), end_date)
+            label = f"{current_start.strftime('%d %b')} - {current_end.strftime('%d %b')}"
+            total = (
+                Expense.objects
+                .filter(user=user, transaction_type=Expense.TransactionType.EXPENSE,
+                        date__gte=current_start, date__lte=current_end)
+                .aggregate(t=Sum("amount"))["t"] or 0
+            )
+            result[label] = float(total)
+            current_start = current_end + timedelta(days=1)
+        return result
+
     now = timezone.now()
     result = OrderedDict()
     for i in range(weeks - 1, -1, -1):
@@ -108,5 +157,8 @@ def weekly_expenses(user, weeks: int = 8):
     return result
 
 
-def recent_transactions(user, limit: int = 8):
-    return list(Expense.objects.filter(user=user).select_related("category")[:limit])
+def recent_transactions(user, limit: int = 8, start_date=None, end_date=None):
+    qs = Expense.objects.filter(user=user).select_related("category")
+    if start_date and end_date:
+        qs = qs.filter(date__gte=start_date, date__lte=end_date)
+    return list(qs[:limit])

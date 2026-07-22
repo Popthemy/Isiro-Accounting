@@ -105,12 +105,12 @@ else:
         }
     }
 
-conn = psycopg2.connect(
-    f"postgresql://postgres.herzxsdusfsijewyvcoj:{os.getenv('DB_PASS')}@aws-1-us-west-2.pooler.supabase.com:5432/postgres"
-)
+# conn = psycopg2.connect(
+#     f"postgresql://postgres.herzxsdusfsijewyvcoj:{os.getenv('DB_PASS')}@aws-1-us-west-2.pooler.supabase.com:5432/postgres"
+# )
 
-print(f"con {conn}")
-print(f'{os.getenv("DATABASE_URL")}')
+# print(f"con {conn}")
+# print(f'{os.getenv("DATABASE_URL")}')
 
 
 # PostgreSQL configuration (uncomment for production):

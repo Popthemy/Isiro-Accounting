@@ -4,3 +4,7 @@
 .env
 # Common ignores
 venv
+
+# Python
+__pycache__/
+*.pyc

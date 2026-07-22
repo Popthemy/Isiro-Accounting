@@ -21,6 +21,7 @@
                     <input type="hidden" name="period" value="{{ period }}">
                     <input type="hidden" name="start" value="{{ start|date:'Y-m-d' }}">
                     <input type="hidden" name="end" value="{{ end|date:'Y-m-d' }}">
+                    <input type="hidden" name="wallet" value="{{ selected_wallet }}">
                     <input type="hidden" name="export_type" value="csv">
                     <button type="submit" class="btn btn-secondary btn-sm"><i class="fas fa-file-csv"></i> Export CSV</button>
                 </form>
@@ -29,6 +30,7 @@
                     <input type="hidden" name="period" value="{{ period }}">
                     <input type="hidden" name="start" value="{{ start|date:'Y-m-d' }}">
                     <input type="hidden" name="end" value="{{ end|date:'Y-m-d' }}">
+                    <input type="hidden" name="wallet" value="{{ selected_wallet }}">
                     <input type="hidden" name="export_type" value="pdf">
                     <button type="submit" class="btn btn-secondary btn-sm"><i class="fas fa-file-pdf"></i> Export PDF</button>
                 </form>
@@ -43,6 +45,7 @@
 
         <!-- Date filters -->
         <form method="get" class="filters filter-group">
+            <input type="hidden" name="period" value="{{ period }}">
             <button type="submit" name="period" value="week" class="filter-btn {% if period == 'week' %}active{% endif %}">This Week</button>
             <button type="submit" name="period" value="month" class="filter-btn {% if period == 'month' %}active{% endif %}">This Month</button>
             <button type="submit" name="period" value="30" class="filter-btn {% if period == '30' %}active{% endif %}">Last 30 Days</button>
@@ -50,14 +53,12 @@
             <select name="wallet" class="form-input">
                 <option value="">All Wallets</option>
                 {% for w in wallets %}
-                <option value="{{ w.id }}" {% if selected_wallet|add:"0" == w.id %}selected{% endif %}>{{ w.name }}</option>
+                <option value="{{ w.id }}" {% if selected_wallet|stringformat:"s" == w.id|stringformat:"s" %}selected{% endif %}>{{ w.name }}</option>
                 {% endfor %}
             </select>
-            {% if period == 'custom' %}
-                <input type="date" name="start" class="form-input" value="{{ start|date:'Y-m-d' }}">
-                <input type="date" name="end" class="form-input" value="{{ end|date:'Y-m-d' }}">
-                <button type="submit" class="btn btn-primary btn-sm">Apply</button>
-            {% endif %}
+            <input type="date" name="start" class="form-input" value="{{ start|date:'Y-m-d' }}">
+            <input type="date" name="end" class="form-input" value="{{ end|date:'Y-m-d' }}">
+            <button type="submit" class="btn btn-primary btn-sm">Apply</button>
         </form>
 
         <p style="color:var(--gray-500); margin-bottom:24px;">

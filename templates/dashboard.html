@@ -1,7 +1,10 @@
-{% extends "base.html" %} {% load static %} 
-{% block title %}Dashboard — Isiro{%endblock %} 
-{% block body_class %}app-page{% endblock %}
- {% block content %}
+{% extends "base.html" %} 
+
+{% load static %} 
+
+{% block title %}Dashboard —Isiro{%endblock %}
+
+{% block body_class %}app-page{% endblock %} {% block content%}
 <div class="app-layout">
   {% include "partials/sidebar.html" with active="dashboard" unread_count=unread_count %}
 
@@ -41,6 +44,27 @@
       {{ message }}
     </div>
     {% endfor %} {% endif %}
+
+    <form method="get" class="filters filter-group" style="margin-bottom: 20px">
+      <input
+        type="date"
+        name="start"
+        class="form-input"
+        value="{{ start|date:'Y-m-d' }}"
+      />
+      <input
+        type="date"
+        name="end"
+        class="form-input"
+        value="{{ end|date:'Y-m-d' }}"
+      />
+      <button type="submit" class="btn btn-primary btn-sm">Apply Range</button>
+      <a href="{% url 'dashboard' %}" class="btn btn-ghost btn-sm">Reset</a>
+    </form>
+
+    <p style="color: var(--gray-500); margin-bottom: 20px">
+      <i class="fas fa-calendar"></i> Showing transactions from {{ start|date:"d M Y" }} to {{ end|date:"d M Y" }}
+    </p>
 
     <!-- Quick actions -->
     <div class="quick-actions">
@@ -304,7 +328,8 @@
               <td
                 class="{% if t.transaction_type == 'expense' %}amount-expense{% else %}amount-income{% endif %}"
               >
-                {% if t.transaction_type == 'expense' %}-{% endif %}{{ t.amount|floatformat:2 }}
+                {% if t.transaction_type == 'expense' %}-{% endif %}{{
+                t.amount|floatformat:2 }}
               </td>
               <td>
                 <span class="badge badge-{{ t.transaction_type }}">
@@ -350,6 +375,7 @@
   <div class="spinner-lg"></div>
   <p>Processing...</p>
 </div>
-{% endblock %} {% block extra_js %}
+{% endblock %} 
+{% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 {% endblock %}

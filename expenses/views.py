@@ -31,12 +31,27 @@ class DashboardView(LoginRequiredMixin, View):
     login_url = "users:login"
     template_name = "dashboard.html"
 
+    def _date_range(self, request):
+        start = request.GET.get("start")
+        end = request.GET.get("end")
+        if start:
+            start = timezone.datetime.strptime(start, "%Y-%m-%d").date()
+        else:
+            start = timezone.now().replace(day=1).date()
+        if end:
+            end = timezone.datetime.strptime(end, "%Y-%m-%d").date()
+        else:
+            end = timezone.now().date()
+        return start, end
+
     def get(self, request):
-        stats = dashboard_stats(request.user)
-        pie = category_breakdown(request.user)
-        line = monthly_spending(request.user)
-        bar = weekly_expenses(request.user)
-        recent = recent_transactions(request.user)
+        start, end = self._date_range(request)
+        stats = dashboard_stats(request.user, start, end)
+        pie = category_breakdown(request.user, start_date=start, end_date=end)
+        line = monthly_spending(request.user, start_date=start, end_date=end)
+        bar = weekly_expenses(request.user, start_date=start, end_date=end)
+        recent = recent_transactions(
+            request.user, start_date=start, end_date=end)
         wallets = Wallet.objects.filter(
             user=request.user, is_active=True).select_related("user")[:8]
         budgets = Budget.objects.filter(
@@ -49,7 +64,7 @@ class DashboardView(LoginRequiredMixin, View):
             "stats": stats, "pie_data": pie, "line_data": line, "bar_data": bar,
             "recent": recent, "budgets": budgets, "notifications": notifications,
             "wallets": wallets, "unread_count": unread_count, "currency": request.user.currency,
-            "today": timezone.now(),
+            "today": timezone.now(), "start": start, "end": end,
         })
 
 
@@ -331,7 +346,8 @@ class ReportsView(LoginRequiredMixin, View):
 
     def _date_range(self, request):
         now = timezone.now()
-        period = request.GET.get("period", "month")
+        # Accept period/start/end from GET (filter UI) or POST (export forms)
+        period = request.GET.get("period") or request.POST.get("period") or "month"
         if period == "week":
             start = (now - timedelta(days=7)).date()
             end = now.date()
@@ -340,13 +356,13 @@ class ReportsView(LoginRequiredMixin, View):
             end = now.date()
         elif period == "custom":
             try:
-                start = timezone.datetime.strptime(
-                    request.GET.get("start", ""), "%Y-%m-%d").date()
+                s = request.GET.get("start") or request.POST.get("start") or ""
+                start = timezone.datetime.strptime(s, "%Y-%m-%d").date()
             except ValueError:
                 start = now.replace(day=1).date()
             try:
-                end = timezone.datetime.strptime(
-                    request.GET.get("end", ""), "%Y-%m-%d").date()
+                e = request.GET.get("end") or request.POST.get("end") or ""
+                end = timezone.datetime.strptime(e, "%Y-%m-%d").date()
             except ValueError:
                 end = now.date()
         else:
